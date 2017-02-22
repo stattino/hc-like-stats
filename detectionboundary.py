@@ -4,6 +4,8 @@ from datageneration import *
 from plotting import *
 from highercrit import *
 import matplotlib.pyplot as plt
+from collections import Counter
+
 
 #DEPRECATED NEEDS UPDATE
 def detection_boundary(n, grids, m1, m2, dist):
@@ -101,3 +103,21 @@ def single_trial_error(n, beta, r, presence, dist):
         else:
             error = 1
     return error
+
+
+def average(list):
+    n = list.shape[0]
+    mean = sum(list)/n
+    sorted_list = list.sort()
+    if n/2 % 1 != 0:
+        median = sorted_list(np.ceil(n/2)) + sorted_list(np.floor(n/2)) / 2
+    else:
+        median = sorted_list[n/2]
+
+    def Most_Common(lst): # BORROWED CODE
+        data = Counter(lst)
+        return data.most_common(1)[0][0]
+
+    type_no = Most_Common(list)
+
+    return mean, type_no, median

@@ -10,8 +10,6 @@ dist = {1: 'chi2', 'df': 1, 'loc': 0}
 
 #detection_boundary(n, grid, m1, m2, dist)
 
-
-
 dense_grid = np.array([10, 10])
 sparse_grid = np.array([5, 10])
 
