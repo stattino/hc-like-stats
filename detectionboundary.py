@@ -5,7 +5,7 @@ from plotting import *
 from highercrit import *
 import matplotlib.pyplot as plt
 
-
+#DEPRECATED NEEDS UPDATE
 def detection_boundary(n, grids, m1, m2, dist):
     dense = dense_region(n, grids[0:2], m1, m2, dist)
     print('dense region complete')
@@ -15,14 +15,14 @@ def detection_boundary(n, grids, m1, m2, dist):
     heat_map_alt(sparse, m1)
 
 
-def dense_region(n, grid, m1, m2, dist):
+def dense_region(n, grid, m1, m2, dist, hc_function):
     dense = np.zeros(grid)
     grid_x = np.linspace(0, 0.5, grid[0])
     grid_y = np.linspace(0, 0.5, grid[1])
     for beta in range(0, grid[0]):
         for r in range(0, grid[1]):
             # dense[beta, r] = error_rate(grid_x[beta], grid_y[r], m1, m2, dist)
-            dense[beta, r] = compute_average_error(n, grid_x[beta], grid_y[r], m1, m2, dist)
+            dense[beta, r] = compute_average_error(n, grid_x[beta], grid_y[r], m1, m2, dist, hc_function)
             print('Fraction dense region completed', r + beta*grid[1] + 1, '/', grid[0]*grid[1])
             """if beta == 0:
                 dense[beta, r] = 0.6
@@ -31,7 +31,7 @@ def dense_region(n, grid, m1, m2, dist):
     return dense
 
 
-def sparse_region(n, grid, m1, m2, dist):
+def sparse_region(n, grid, m1, m2, dist, hc_function):
     sparse = np.zeros(grid)
     grid_x = np.linspace(0.5, 1, grid[0])
     grid_x[0] += 1/grid[0] * 1/10 # Get the sparse version of the parametrization
@@ -40,21 +40,21 @@ def sparse_region(n, grid, m1, m2, dist):
         for r in range(0, grid[1]):
             # sparse[beta, r] = error_rate(grid_x[beta], grid_y[r], m1, m2, dist)
             # print('(beta, r) = (', grid_x[beta], grid_y[r],') --- (epsilon*n, mu0) = (', np.power(n, -grid_x[beta])*n, np.sqrt(2*grid_y[r]*np.log(n)), ')')
-            sparse[beta, r] = compute_average_error(n, grid_x[beta], grid_y[r], m1, m2, dist)
+            sparse[beta, r] = compute_average_error(n, grid_x[beta], grid_y[r], m1, m2, dist, hc_function)
             print('Fraction of sparse region completed', r + beta * grid[1] + 1, '/', grid[0] * grid[1])
     return sparse
 
 
-def compute_average_error(n, beta, r, m1, m2, dist):
+def compute_average_error(n, beta, r, m1, m2, dist, hc_function):
     half = int(m1/2)
     hc_type_1 = np.zeros(half)
     hc_type_2 = np.zeros(half)
     for i in range(0, half):
         x = generate_data(n, beta, r, 0, dist)
-        _, hc = hc_cscshm(x, beta, r, dist)
+        _, hc = hc_function(x, beta, r, dist)
         hc_type_1[i] = hc
         y = generate_data(n, beta, r, 1, dist)
-        _, hc = hc_cscshm(y, beta, r, dist)
+        _, hc = hc_function(y, beta, r, dist)
         hc_type_2[i] = hc
     d_size = 10
     deltas = 0.2*np.linspace(1, d_size, 10)

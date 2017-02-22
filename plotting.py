@@ -76,7 +76,7 @@ def heat_map(dense, sparse, n):
     return
 
 
-def heat_map_alt(matrix, n):
+def heat_map_alt(matrix, n, msg):
     fig = plt.figure()
     nx, ny = matrix.shape
     if nx == ny:
@@ -96,7 +96,7 @@ def heat_map_alt(matrix, n):
         plt.ylim(0, 1)
     plt.colorbar()
     time = strftime("%m-%d_%H-%M-%S", gmtime())
-    filename = 'plots/heatmaps/Detection_Boundary_n={}_grid={}x{}_time_{}.png'.format(n, nx, ny, time)
+    filename = 'plots/heatmaps/Detection_Boundary_n={}_grid={}x{}_time_{}_{}.png'.format(n, nx, ny, time, msg)
     print(filename)
     fig.savefig(filename)
     return

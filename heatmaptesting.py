@@ -10,6 +10,8 @@ dist = {1: 'chi2', 'df': 1, 'loc': 0}
 
 #detection_boundary(n, grid, m1, m2, dist)
 
+
+
 dense_grid = np.array([10, 10])
 sparse_grid = np.array([5, 10])
 
@@ -17,6 +19,6 @@ sparse_grid = np.array([5, 10])
 #heat_map_alt(dense, m1)
 #heat_map_save(dense, m1, 'dense')
 
-sparse = sparse_region(n, sparse_grid, m1, m2, dist)
+sparse = sparse_region(n, sparse_grid, m1, m2, dist, hc_cscshm)
 heat_map_alt(sparse, m1)
 heat_map_save(sparse, m1, 'sparse')
