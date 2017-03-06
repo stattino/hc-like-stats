@@ -11,28 +11,6 @@ def generate_data(n, beta, r, signal_presence, dist):
     else:
         print('check distribution')
 
-def generate_classification_data(n, p, beta, r, balance=0.5):
-    if p < 2*n:
-        print('...not considering p>>n...')
-    tau = np.sqrt(2 * r * np.log(p))
-    epsilon = np.power(p, -beta)
-    mu0 = tau/np.sqrt(n)
-
-    n_signals = np.ceil(epsilon * p)
-    index = np.random.choice(p, n_signals, False)
-
-    x = np.zeros([n, p])
-    y = np.ones(n)
-    n_class_2 = np.ceil(balance*n)
-    index_class_2 = np.random.choice(n, n_class_2, False)
-    y[index_class_2] *= -1
-
-    for i in range(0, n):
-        x[i, ] = np.random.normal(0, 1, p)
-        x[i, index] = np.random.normal(mu0*y[i], 1, n_signals)
-
-    return x, y
-
 
 def generate_normal_mixture(n, beta, r, signal_presence):
     epsilon = np.power(n, -beta)
@@ -60,6 +38,34 @@ def generate_chi2_mixture(n, beta, r, signal_presence, df=1, location=0):
         index = np.random.choice(n, n_signals, False)
         x[index] = chi2.rvs(df, location+w0, 1, n_signals)
     return x
+
+
+def generate_classification_data(p, theta, beta, r, balance=0.5):
+    n = int(np.ceil(np.power(p, theta)))
+    if p < 2*n:
+        print('...not considering p>>n...')
+    tau = np.sqrt(2 * r * np.log(p))
+    epsilon = np.power(p, -beta)
+    mu0 = tau/np.sqrt(n)
+
+    n_signals = np.ceil(epsilon * p)
+    index = np.random.choice(p, n_signals, False)
+
+    x = np.zeros([n, p])
+    y = np.ones(n)
+    n_class_2 = np.ceil(balance*n)
+    index_class_2 = np.random.choice(n, n_class_2, False)
+    y[index_class_2] *= -1
+
+    for i in range(0, n):
+        x[i, ] = np.random.normal(0, 1, p)
+        x[i, index] = np.random.normal(mu0*y[i], 1, n_signals)
+
+    return x, y
+
+
+def generate_classification_test_data(p, theta, beta, r):
+    return
 
 
 def normalize_matrix(x):

@@ -109,6 +109,7 @@ def heat_map_save(matrix, n, msg):
     np.savetxt(filename, matrix)
     return
 
+
 def visualize_regions():
     halves = 0.5*np.array([1, 1])
     axes = np.array([0, 1])
@@ -122,6 +123,51 @@ def visualize_regions():
             return xx - 0.5
         elif xx < 1:
             return np.power((1 - np.sqrt(1-xx)), 2)
+    detection_bound = np.vectorize(f)
+    x = np.linspace(0, 1, 1000)
+    y = detection_bound(x)
+    plt.fill_between(x, y, np.zeros(1000), facecolor='b')
+    plt.plot(x, y, color='r')
+    plt.show()
+    return
+
+
+def visualize_regions_theta(theta):
+    halves = 0.5 * np.array([1, 1])
+    axes = np.array([0, 1])
+    plt.plot(halves, axes, color='k')
+    plt.plot(axes, halves, color='k')
+
+    def f(xx):
+        if xx < 1 / 2:
+            return xx-xx
+        elif xx < 3 / 4:
+            return (1 - theta)*(xx - 0.5)
+        elif xx < 1:
+            return (1 - theta)*np.power((1 - np.sqrt(1 - xx)), 2)
+
+    detection_bound = np.vectorize(f)
+    x = np.linspace(0, 1, 1000)
+    y = detection_bound(x/(1 - theta))
+    # plt.fill_between(x, y, np.zeros(1000), facecolor='b')
+    plt.plot(x, y, color='r')
+    plt.show()
+    return
+
+def visualize_regions_sigma(theta): # INTE IMPLEMENTERAD ÄN
+    halves = 0.5 * np.array([1, 1])
+    axes = np.array([0, 1])
+    plt.plot(halves, axes, color='k')
+    plt.plot(axes, halves, color='k')
+
+    def f(xx):
+        if xx < 1 / 2:
+            return 0.5 - xx
+        elif xx < 3 / 4:
+            return xx - 0.5
+        elif xx < 1:
+            return np.power((1 - np.sqrt(1 - xx)), 2)
+
     detection_bound = np.vectorize(f)
     x = np.linspace(0, 1, 1000)
     y = detection_bound(x)

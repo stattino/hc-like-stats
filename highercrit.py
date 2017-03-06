@@ -66,7 +66,7 @@ def hc_thresholding(x, y, beta, r, threshold='hard'):
     z = np.zeros(p)
     for i in range(0, p):
         z[i] = np.sqrt(1/n)*np.sum(np.multiply(x[:, i], y))
-    pi = calculate_p_values(z)
+    pi = calculate_p_values(z, {1: 'norm'})
     sorted_pi = sort_by_size(pi)
     hc_vector = np.zeros(p)
     print('Data generated')
@@ -122,9 +122,6 @@ def calculate_p_values(x, dist):  # one sided normal/chi2 p-values
         degrees_freedom = dist['df']
         location = dist['loc']
         p_values = chi2.sf(x, degrees_freedom, location)
-
-        # for i in range(0, n):
-        #    p_values[i] = chi2.sf(x[i], degrees_freedom, location)
     return p_values
 
 

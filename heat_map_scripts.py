@@ -2,9 +2,9 @@ from detectionboundary import *
 import numpy as np
 # SCRIPT TO RUN 22/2
 
-m1 = 100
+m1 = 150
 m2 = 50 # lol boll troll
-n = 10000
+n = 1000
 dist = {1: 'norm'} #dist = {1: 'chi2', 'df': 1, 'loc': 0}
 distributions = {'norm': {1: 'norm'}}
                 # 'chi2': {1: 'chi2', 'df': 1, 'loc': 0}}
@@ -19,6 +19,7 @@ for dist_type in distributions:
     dist = distributions[dist_type]
     for key in hc_functions:
         dense = dense_region(n, dense_grid, m1, m2, dist, hc_functions[key])
+
 
         msg1 = 'dense' + key
         heat_map_alt(dense, m1, msg1)

@@ -4,7 +4,7 @@ from highercrit import *
 from datageneration import *
 
  # Data for testing
-N = 1000000
+N = 1000
 beta = 0.8
 r = 0.4
 signal_presence = 1
@@ -22,3 +22,5 @@ plot_option = 1
 #i, hc = hc_orthodox(A, beta, r, dist, plot_option)
 #i_plus, hc_plus = hc_plus(A, beta, r, dist, plot_option)
 i_cs, hc_cs = hc_cscshm(A, beta, r, dist, plot_option)
+
+

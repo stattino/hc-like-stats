@@ -36,12 +36,11 @@ def dense_region(n, grid, m1, m2, dist, hc_function):
 def sparse_region(n, grid, m1, m2, dist, hc_function):
     sparse = np.zeros(grid)
     grid_x = np.linspace(0.5, 1, grid[0])
-    grid_x[0] += 1/grid[0] * 1/10 # Get the sparse version of the parametrization
+    grid_x[0] += 1/grid[0] * 1/10  # Get the sparse version of the parametrization
     grid_y = np.linspace(0, 1, grid[1])
     for beta in range(0, grid[0]):
         for r in range(0, grid[1]):
             # sparse[beta, r] = error_rate(grid_x[beta], grid_y[r], m1, m2, dist)
-            # print('(beta, r) = (', grid_x[beta], grid_y[r],') --- (epsilon*n, mu0) = (', np.power(n, -grid_x[beta])*n, np.sqrt(2*grid_y[r]*np.log(n)), ')')
             sparse[beta, r] = compute_average_error(n, grid_x[beta], grid_y[r], m1, m2, dist, hc_function)
             print('Fraction of sparse region completed', r + beta * grid[1] + 1, '/', grid[0] * grid[1])
     return sparse
@@ -80,8 +79,8 @@ def error_rate(beta, r, m1, m2, dist):
     for i in range(0, half):
         type_2_error += single_trial_error(m1, beta, r, 1, dist)
     average_error = (type_1_error + type_2_error) / m2
-    type_1_error = type_1_error/(m2/2)
-    type_2_error = type_2_error/(m2/2)
+    # type_1_error = type_1_error/(m2/2)
+    # type_2_error = type_2_error/(m2/2)
     return average_error  #, type_1_error, type_2_error
 
 
