@@ -61,26 +61,31 @@ def hc_cscshm(x, beta, r, dist, plot=0):
     return i_opt, hc_opt
 
 
-def hc_thresholding(x, y, beta, r, threshold='hard'):
+def hc_thresholding(x, y, beta, r, hc_function, threshold='hard'):
     n, p = x.shape
     z = np.zeros(p)
     for i in range(0, p):
         z[i] = np.sqrt(1/n)*np.sum(np.multiply(x[:, i], y))
-    pi = calculate_p_values(z, {1: 'norm'})
-    sorted_pi = sort_by_size(pi)
-    hc_vector = np.zeros(p)
-    print('Data generated')
 
-    for i in range(1, p):
-        hc_vector[i] = np.sqrt(p) * (i/p - sorted_pi[i]) / np.sqrt(i/p * (1 - i/p))
+    if hc_function=='default':
+        pi = calculate_p_values(z, {1: 'norm'})
+        sorted_pi = sort_by_size(pi)
+        hc_vector = np.zeros(p)
+        # print('Data generated')
 
-    print('HC statistic calculated')
-    i_opt = np.argmax(hc_vector)
-    hc_opt = hc_vector[i_opt]
-    z_opt = z[i_opt]
-    print('Optimal HC:', hc_opt, 'index i_opt:', i_opt)
+        for i in range(1, p):
+            hc_vector[i] = np.sqrt(p) * (i/p - sorted_pi[i]) / np.sqrt(i/p * (1 - i/p))
 
-    save_figures(z, sorted_pi, hc_vector, hc_opt, i_opt, beta, r, 'threshold')
+        # print('HC statistic calculated')
+        i_opt = np.argmax(hc_vector)
+        # hc_opt = hc_vector[i_opt]
+        z_opt = z[i_opt]
+    else:
+        i_opt, _ = hc_function(z, beta, r, {1: 'norm'})
+        z_opt = z[i_opt]
+    # print('Optimal HC:', hc_opt, 'index i_opt:', i_opt)
+
+    # save_figures(z, sorted_pi, hc_vector, hc_opt, i_opt, beta, r, 'threshold')
 
     weights = np.zeros(p)
     if threshold == 'hard':
@@ -119,6 +124,21 @@ def calculate_p_values(x, dist):  # one sided normal/chi2 p-values
         #for i in range(0, n):
          #   p_values[i] = norm.sf(x[i])
     elif dist[1] == 'chi2':
+        degrees_freedom = dist['df']
+        location = dist['loc']
+        p_values = chi2.sf(x, degrees_freedom, location)
+    return p_values
+
+
+def calculate_two_sided_p_values(x, dist):  # one sided normal/chi2 p-values
+    n = x.shape[0]
+    p_values = np.zeros(n)
+    if dist[1] == 'norm':
+        p_values = 2*norm.cdf(-x)
+        #for i in range(0, n):
+         #   p_values[i] = norm.sf(x[i])
+    elif dist[1] == 'chi2':
+        print('not implemented yet..')
         degrees_freedom = dist['df']
         location = dist['loc']
         p_values = chi2.sf(x, degrees_freedom, location)

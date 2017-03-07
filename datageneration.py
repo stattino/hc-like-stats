@@ -51,17 +51,24 @@ def generate_classification_data(p, theta, beta, r, balance=0.5):
     n_signals = np.ceil(epsilon * p)
     index = np.random.choice(p, n_signals, False)
 
-    x = np.zeros([n, p])
-    y = np.ones(n)
+    x_train = np.zeros([n, p])
+    y_train = np.ones(n)
+    x_test = np.zeros([n, p])
+    y_test = np.ones(n)
+
     n_class_2 = np.ceil(balance*n)
     index_class_2 = np.random.choice(n, n_class_2, False)
-    y[index_class_2] *= -1
+
+    y_train[index_class_2] *= -1
+    y_test[index_class_2] *= -1
 
     for i in range(0, n):
-        x[i, ] = np.random.normal(0, 1, p)
-        x[i, index] = np.random.normal(mu0*y[i], 1, n_signals)
+        x_train[i, ] = np.random.normal(0, 1, p)
+        x_train[i, index] = np.random.normal(mu0*y_train[i], 1, n_signals)
+        x_test[i,] = np.random.normal(0, 1, p)
+        x_test[i, index] = np.random.normal(mu0 * y_test[i], 1, n_signals)
 
-    return x, y
+    return x_train, y_train, x_test, y_test
 
 
 def generate_classification_test_data(p, theta, beta, r):

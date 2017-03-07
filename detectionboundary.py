@@ -7,14 +7,51 @@ import matplotlib.pyplot as plt
 from collections import Counter
 
 
-#DEPRECATED NEEDS UPDATE
-def detection_boundary(n, grids, m1, m2, dist):
-    dense = dense_region(n, grids[0:2], m1, m2, dist)
+def classification_detection_boundary(theta, p, grid, m1, m2, hc_function):
+    error_matrix = classification_region(theta, p, grid, m1, m2, hc_function)
+    x_lim = np.array([0, 1-theta])
+    y_lim = np.array([0, 1-theta])
+    normalize_colors(error_matrix)
+    heat_map_alt(error_matrix, p, x_lim, y_lim, 'classification')
+
+
+def classification_region(theta, p, grid, m1, m2, hc_function):
+    dense = np.zeros(grid)
+    grid_x = np.linspace(0, 1-theta, grid[0])
+    grid_y = np.linspace(0, 1-theta, grid[1])
+    for beta in range(0, grid[0]):
+        for r in range(0, grid[1]):
+            # dense[beta, r] = error_rate(grid_x[beta], grid_y[r], m1, m2, dist)
+            dense[beta, r] = classification_error(theta, grid_x[beta], grid_y[r], p, m1, m2, hc_function)
+            print('Fraction dense region completed', r + beta*grid[1] + 1, '/', grid[0]*grid[1])
+    return dense
+
+
+def classification_error(theta, beta, r, p, m1, m2, hc_function):
+    error = 0
+    for i in range(0, m1):
+        x_train, y_train, x_test, y_test = generate_classification_data(p, theta, beta, r)
+        _, weights = hc_thresholding(x_train, y_train, beta, r, hc_function, 'clip')
+        y_attempt = discriminant_rule(weights, x_test)
+        error += sum(y_attempt != y_test) / y_test.shape
+    return error/m1
+
+
+def testing_detection_boundary(n, grids, m1, m2, dist, hc_function):
+
+    dense = dense_region(n, grids[0:2], m1, m2, dist, hc_function)
     print('dense region complete')
-    sparse = sparse_region(n, grids[2:4], m1, m2, dist)
+    x_lim = np.array([0, 0.5])
+    y_lim = np.array([0, 0.5])
+    normalize_colors(dense)
+    heat_map_alt(dense, m1, x_lim, y_lim, 'dense')
+
+    sparse = sparse_region(n, grids[2:4], m1, m2, dist, hc_function)
     print('sparse region complete')
-    heat_map_alt(dense, m1)
-    heat_map_alt(sparse, m1)
+    x_lim = np.array([0.5, 1])
+    y_lim = np.array([0, 1])
+    normalize_colors(sparse)
+    heat_map_alt(sparse, m1, x_lim, y_lim,  'sparse')
 
 
 def dense_region(n, grid, m1, m2, dist, hc_function):
@@ -69,54 +106,16 @@ def compute_average_error(n, beta, r, m1, m2, dist, hc_function):
     return error
 
 
-# Old code, don't use
-def error_rate(beta, r, m1, m2, dist):
-    type_1_error = 0
-    type_2_error = 0
-    half = int(m2/2)
-    for i in range(0, half):
-        type_1_error += single_trial_error(m1, beta, r, 0, dist)
-    for i in range(0, half):
-        type_2_error += single_trial_error(m1, beta, r, 1, dist)
-    average_error = (type_1_error + type_2_error) / m2
-    # type_1_error = type_1_error/(m2/2)
-    # type_2_error = type_2_error/(m2/2)
-    return average_error  #, type_1_error, type_2_error
-
-
-def single_trial_error(n, beta, r, presence, dist):
-    threshold = np.sqrt(2*(1+delta)*np.log(np.log(n)))
-    error = np.NaN
-    if presence == 0:
-        x = generate_data(n, beta, r, presence, dist)
-        _, hc = hc_plus(x, beta, r, dist)
-        if hc > threshold:
-            error = 1
-        else:
-            error = 0
-    elif presence == 1:
-        x = generate_data(n, beta, r, presence, dist)
-        _, hc = hc_plus(x, beta, r, dist)
-        if hc > threshold:
-            error = 0
-        else:
-            error = 1
-    return error
-
-
-def average(list):
-    n = list.shape[0]
-    mean = sum(list)/n
-    sorted_list = list.sort()
-    if n/2 % 1 != 0:
-        median = sorted_list(np.ceil(n/2)) + sorted_list(np.floor(n/2)) / 2
-    else:
-        median = sorted_list[n/2]
-
-    def Most_Common(lst): # BORROWED CODE
-        data = Counter(lst)
-        return data.most_common(1)[0][0]
-
-    type_no = Most_Common(list)
-
-    return mean, type_no, median
+def normalize_colors(matrix):
+    n, p = matrix.shape
+    for i in range(0, n):
+        for j in range(0, p):
+            if matrix[i, j] > 0.5:
+                matrix[i, j] = 0.5
+    if n*p > 1000:
+        index = matrix.argmin()
+        matrix[index] = 0
+    index = matrix.argmax()
+    index_x = index%p
+    index_y = int((index-index_x) /p)
+    matrix[index_x, index_y] = 0.5

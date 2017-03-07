@@ -76,24 +76,15 @@ def heat_map(dense, sparse, n):
     return
 
 
-def heat_map_alt(matrix, n, msg):
+def heat_map_alt(matrix, n, x_lim, y_lim, msg):
     fig = plt.figure()
     nx, ny = matrix.shape
-    if nx == ny:
-        x = np.linspace(0, 0.5, nx+1)
-        y = np.linspace(0, 0.5, ny+1)
-        xv, yv = np.meshgrid(x, y)
-        plt.pcolormesh(xv, yv, matrix.transpose(), cmap='RdYlBu')
-        plt.xlim(0, 0.5)
-        plt.ylim(0, 0.5)
-    else:
-        nx, ny = matrix.shape
-        x = np.linspace(0.5, 1, nx+1)
-        y = np.linspace(0, 1, ny+1)
-        xv, yv = np.meshgrid(x, y)
-        plt.pcolormesh(xv, yv, matrix.transpose(), cmap='RdYlBu')  #seismic, RdYlBu, coolwarm
-        plt.xlim(0.5, 1)
-        plt.ylim(0, 1)
+    x = np.linspace(x_lim[0], x_lim[1], nx+1)
+    y = np.linspace(y_lim[0], y_lim[1], ny+1)
+    xv, yv = np.meshgrid(x, y)
+    plt.pcolormesh(xv, yv, matrix.transpose(), cmap='RdYlBu')
+    plt.xlim(x_lim[0], x_lim[1])
+    plt.ylim(y_lim[0], y_lim[1])
     plt.colorbar()
     time = strftime("%m-%d_%H-%M-%S", gmtime())
     filename = 'plots/heatmaps/Detection_Boundary_n={}_grid={}x{}_time_{}_{}.png'.format(n, nx, ny, time, msg)
