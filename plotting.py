@@ -5,7 +5,6 @@ from time import gmtime, strftime
 
 def save_figures(z, pi, hcs, hc_opt, i_opt, beta, r, msg):
     alpha_0 = 0.1
-
     time = strftime("%m-%d_%H-%M-%S", gmtime())
     n = pi.shape[0]
     if n<1000000:
@@ -53,7 +52,6 @@ def visualize_values(z, pi, hcs, hc_opt, i_opt):
 
 
 def heat_map(dense, sparse, n):
-
     fig = plt.figure()
     nx, ny = dense.shape
     x = np.linspace(0, 0.5, nx)
@@ -72,7 +70,6 @@ def heat_map(dense, sparse, n):
     filename = 'plots/heatmaps/Detection_Boundary_n={}_time_{}.png'.format(n, time)
     print(filename)
     fig.savefig(filename)
-
     return
 
 
@@ -82,7 +79,7 @@ def heat_map_alt(matrix, n, x_lim, y_lim, msg):
     x = np.linspace(x_lim[0], x_lim[1], nx+1)
     y = np.linspace(y_lim[0], y_lim[1], ny+1)
     xv, yv = np.meshgrid(x, y)
-    plt.pcolormesh(xv, yv, matrix.transpose(), cmap='RdYlBu')
+    plt.pcolormesh(xv, yv, matrix.transpose(), cmap='RdYlBu_r')
     plt.xlim(x_lim[0], x_lim[1])
     plt.ylim(y_lim[0], y_lim[1])
     plt.colorbar()
@@ -93,9 +90,9 @@ def heat_map_alt(matrix, n, x_lim, y_lim, msg):
     return
 
 
-def heat_map_save(matrix, n, msg):
+def heat_map_save(matrix, n, m, msg):
     time = strftime("%m-%d_%H-%M-%S", gmtime())
-    filename = 'data/heatmap_data_{}_n={}_time_{}.txt'.format(msg, n, time)
+    filename = 'data/heatmap_data_{}_n={}x{}_time_{}.txt'.format(msg, n, m, time)
     print(filename)
     np.savetxt(filename, matrix)
     return
@@ -144,6 +141,7 @@ def visualize_regions_theta(theta):
     plt.plot(x, y, color='r')
     plt.show()
     return
+
 
 def visualize_regions_sigma(theta): # INTE IMPLEMENTERAD ÄN
     halves = 0.5 * np.array([1, 1])

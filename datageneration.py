@@ -69,25 +69,3 @@ def generate_classification_data(p, theta, beta, r, balance=0.5):
         x_test[i, index] = np.random.normal(mu0 * y_test[i], 1, n_signals)
 
     return x_train, y_train, x_test, y_test
-
-
-def generate_classification_test_data(p, theta, beta, r):
-    return
-
-
-def normalize_matrix(x):
-    if len(x.shape) > 1:
-        n, p = x.shape
-    else:
-        print('normalize_matrix requires matrix')
-        return
-    for col in range(0, p):
-        mean = sum(x[:, col]/n)
-        print(mean)
-        variance = sum(np.power(np.add(x[:, col], -mean), 2))
-
-        x[:, col] -= mean
-        x[:, col] /= variance
-
-    print(x)
-    return

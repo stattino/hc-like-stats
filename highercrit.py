@@ -21,6 +21,7 @@ def hc_orthodox(x, beta, r, dist, plot=0):
         visualize_values(x, sorted_pi, hc_vector, hc_opt, i_opt)
     return i_opt, hc_opt
 
+
 def hc_plus(x, beta, r, dist, plot=0):
     n = x.shape[0]
     pi = calculate_p_values(x, dist)

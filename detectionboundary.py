@@ -10,7 +10,8 @@ from collections import Counter
 def classification_detection_boundary(theta, p, grid, m1, m2, hc_function):
     error_matrix = classification_region(theta, p, grid, m1, m2, hc_function)
     x_lim = np.array([0, 1-theta])
-    y_lim = np.array([0, 1-theta])
+    y_lim = np.array([0, 1])
+    heat_map_save(error_matrix, grid[0], grid[1], 'classification')
     normalize_colors(error_matrix)
     heat_map_alt(error_matrix, p, x_lim, y_lim, 'classification')
 
@@ -18,12 +19,12 @@ def classification_detection_boundary(theta, p, grid, m1, m2, hc_function):
 def classification_region(theta, p, grid, m1, m2, hc_function):
     dense = np.zeros(grid)
     grid_x = np.linspace(0, 1-theta, grid[0])
-    grid_y = np.linspace(0, 1-theta, grid[1])
+    grid_y = np.linspace(0, 1, grid[1])
     for beta in range(0, grid[0]):
         for r in range(0, grid[1]):
             # dense[beta, r] = error_rate(grid_x[beta], grid_y[r], m1, m2, dist)
             dense[beta, r] = classification_error(theta, grid_x[beta], grid_y[r], p, m1, m2, hc_function)
-            print('Fraction dense region completed', r + beta*grid[1] + 1, '/', grid[0]*grid[1])
+            print('Fraction of region completed', r + beta*grid[1] + 1, '/', grid[0]*grid[1])
     return dense
 
 
@@ -43,6 +44,7 @@ def testing_detection_boundary(n, grids, m1, m2, dist, hc_function):
     print('dense region complete')
     x_lim = np.array([0, 0.5])
     y_lim = np.array([0, 0.5])
+    heat_map_save(dense, grids[0], grids[1], 'dense_matrix')
     normalize_colors(dense)
     heat_map_alt(dense, m1, x_lim, y_lim, 'dense')
 
@@ -50,6 +52,7 @@ def testing_detection_boundary(n, grids, m1, m2, dist, hc_function):
     print('sparse region complete')
     x_lim = np.array([0.5, 1])
     y_lim = np.array([0, 1])
+    heat_map_save(sparse, grids[2], grids[3], 'sparse_matrix')
     normalize_colors(sparse)
     heat_map_alt(sparse, m1, x_lim, y_lim,  'sparse')
 
@@ -62,11 +65,7 @@ def dense_region(n, grid, m1, m2, dist, hc_function):
         for r in range(0, grid[1]):
             # dense[beta, r] = error_rate(grid_x[beta], grid_y[r], m1, m2, dist)
             dense[beta, r] = compute_average_error(n, grid_x[beta], grid_y[r], m1, m2, dist, hc_function)
-            print('Fraction dense region completed', r + beta*grid[1] + 1, '/', grid[0]*grid[1])
-            """if beta == 0:
-                dense[beta, r] = 0.6
-            if r == 0:
-                dense[beta, r] = 1"""
+            print('Fraction of dense region completed', r + beta*grid[1] + 1, '/', grid[0]*grid[1])
     return dense
 
 
@@ -112,10 +111,12 @@ def normalize_colors(matrix):
         for j in range(0, p):
             if matrix[i, j] > 0.5:
                 matrix[i, j] = 0.5
-    if n*p > 1000:
+    if n*p > 10:
         index = matrix.argmin()
-        matrix[index] = 0
+        index_y = index % p
+        index_x = int((index - index_y)/ p)
+        matrix[index_x, index_y] = 0
     index = matrix.argmax()
-    index_x = index%p
-    index_y = int((index-index_x) /p)
+    index_y = index % p
+    index_x = int((index - index_x) / p)
     matrix[index_x, index_y] = 0.5
