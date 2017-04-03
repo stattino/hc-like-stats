@@ -17,7 +17,7 @@ grids = np.append(dense_grid, sparse_grid)
 
 classification_grid = np.array([50, 50])
 
-classification_detection_boundary(theta, p, classification_grid, m1, m2, hc_cscshm)
+classification_detection_boundary(theta, p, classification_grid, m1, m2, hc_cscshm_1)
 
 #testing_detection_boundary(n, grids, m1, m2, dist, hc_cscshm)
 

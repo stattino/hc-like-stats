@@ -41,7 +41,7 @@ def hc_plus(x, beta, r, dist, plot=0):
     return i_opt, hc_opt
 
 
-def hc_cscshm(x, beta, r, dist, plot=0):
+def hc_cscshm_1(x, beta, r, dist, plot=0):
     #  Csörgós Csörgós Horvath Mason
     n = x.shape[0]
     pi = calculate_p_values(x, dist)
@@ -52,6 +52,27 @@ def hc_cscshm(x, beta, r, dist, plot=0):
             pi_val = sorted_pi[i]
             norm = pi_val * (1 - pi_val)
             hc_vector[i] = np.sqrt(n) * (i/n - pi_val) / np.sqrt(norm * np.log(np.log(1 / norm)))
+    i_opt = np.argmax(hc_vector)
+    hc_opt = np.max(hc_vector)
+    # print('Optimal HC:', hc_opt, 'index i_opt:', i_opt)
+    if plot == 1:
+        save_figures(x, sorted_pi, hc_vector, hc_opt, i_opt, beta, r, 'CsCsHM')
+    elif plot == 2:
+        visualize_values(x, sorted_pi, hc_vector, hc_opt, i_opt)
+    return i_opt, hc_opt
+
+
+def hc_cscshm_2(x, beta, r, dist, plot=0):
+    #  Csörgós Csörgós Horvath Mason
+    n = x.shape[0]
+    pi = calculate_p_values(x, dist)
+    sorted_pi = sort_by_size(pi)
+    hc_vector = np.zeros(n)
+    for i in range(1, n):
+        if sorted_pi[i] > 1/n:
+            pi_val = sorted_pi[i]
+            norm = pi_val * (1 - pi_val)
+            hc_vector[i] = np.sqrt(n) * (i/n - pi_val) / (np.sqrt(norm) * np.log(np.log(1 / norm)))
     i_opt = np.argmax(hc_vector)
     hc_opt = np.max(hc_vector)
     # print('Optimal HC:', hc_opt, 'index i_opt:', i_opt)

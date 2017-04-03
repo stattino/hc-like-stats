@@ -3,7 +3,7 @@ import numpy as np
 # SCRIPT TO RUN 22/2
 
 m1 = 150
-m2 = 50 # lol boll troll
+m2 = 50 # irrelevant
 n = 1000
 dist = {1: 'norm'} #dist = {1: 'chi2', 'df': 1, 'loc': 0}
 distributions = {'norm': {1: 'norm'}}
@@ -12,7 +12,7 @@ distributions = {'norm': {1: 'norm'}}
 dense_grid = np.array([30, 30])
 sparse_grid = np.array([60, 70])
 
-hc_functions = {'CsCsHM': hc_cscshm, 'plus': hc_plus}
+hc_functions = {'CsCsHM_1': hc_cscshm_1, 'CsCsHM_2': hc_cscshm_2, 'plus': hc_plus}
                 #'orthodox': hc_orthodox}
 
 for dist_type in distributions:
