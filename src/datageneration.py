@@ -41,7 +41,7 @@ def generate_chi2_mixture(n, beta, r, signal_presence, df=1, location=0):
 
 
 def generate_classification_data(p, theta, beta, r, balance=0.5):
-    n = int(np.ceil(np.power(p, theta)))
+    n = int(np.ceil(2 * np.power(p, theta)))
     if p < 2*n:
         print('...not considering p>>n...')
     tau = np.sqrt(2 * r * np.log(p))

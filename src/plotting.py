@@ -84,7 +84,7 @@ def heat_map_alt(matrix, n, x_lim, y_lim, msg):
     plt.ylim(y_lim[0], y_lim[1])
     plt.colorbar()
     time = strftime("%m-%d_%H-%M-%S", gmtime())
-    filename = 'plots/heatmaps/Detection_Boundary_n={}_grid={}x{}_time_{}_{}.png'.format(n, nx, ny, time, msg)
+    filename = '../plots/heatmaps/Detection_Boundary_n={}_grid={}x{}_time_{}_{}.png'.format(n, nx, ny, time, msg)
     print(filename)
     fig.savefig(filename)
     return
@@ -92,7 +92,7 @@ def heat_map_alt(matrix, n, x_lim, y_lim, msg):
 
 def heat_map_save(matrix, n, m, msg):
     time = strftime("%m-%d_%H-%M-%S", gmtime())
-    filename = 'data/heatmap_data_{}_n={}x{}_time_{}.txt'.format(msg, n, m, time)
+    filename = '../data/heatmap_data_{}_grid={}x{}_time_{}.txt'.format(msg, n, m, time)
     print(filename)
     np.savetxt(filename, matrix)
     return
