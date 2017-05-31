@@ -23,7 +23,10 @@ def classification_region(theta, p, grid, m1, m2, hc_function):
     for beta in range(0, grid[0]):
         for r in range(0, grid[1]):
             # dense[beta, r] = error_rate(grid_x[beta], grid_y[r], m1, m2, dist)
-            dense[beta, r] = classification_error(theta, grid_x[beta], grid_y[r], p, m1, m2, hc_function)
+            if (r > 0.2) and (beta < 0.2):
+                dense[beta, r] = 0
+            else:
+                dense[beta, r] = classification_error(theta, grid_x[beta], grid_y[r], p, m1, m2, hc_function)
             print('Fraction of region completed', r + beta*grid[1] + 1, '/', grid[0]*grid[1])
     return dense
 
@@ -65,7 +68,8 @@ def dense_region(n, grid, m1, m2, dist, hc_function):
         for r in range(0, grid[1]):
             # dense[beta, r] = error_rate(grid_x[beta], grid_y[r], m1, m2, dist)
             dense[beta, r] = compute_average_error(n, grid_x[beta], grid_y[r], m1, m2, dist, hc_function)
-            print('Fraction of dense region completed', r + beta*grid[1] + 1, '/', grid[0]*grid[1])
+            if ( (r + beta*grid[1] + 1) % (grid[0]*grid[1]/10) == 0):
+                print('Fraction of dense region completed', 100*(r + beta*grid[1] + 1) / (grid[0]*grid[1]) , '%')
     return dense
 
 
@@ -78,7 +82,9 @@ def sparse_region(n, grid, m1, m2, dist, hc_function):
         for r in range(0, grid[1]):
             # sparse[beta, r] = error_rate(grid_x[beta], grid_y[r], m1, m2, dist)
             sparse[beta, r] = compute_average_error(n, grid_x[beta], grid_y[r], m1, m2, dist, hc_function)
-            print('Fraction of sparse region completed', r + beta * grid[1] + 1, '/', grid[0] * grid[1])
+            if ((r + beta * grid[1] + 1) % (grid[0] * grid[1] / 10) == 0):
+                print('Fraction of sparse region completed', 100 * (r + beta * grid[1] + 1) / (grid[0] * grid[1]), '%')
+            #print('Fraction of sparse region completed', r + beta * grid[1] + 1, '/', grid[0] * grid[1])
     return sparse
 
 
@@ -120,3 +126,11 @@ def normalize_colors(matrix):
     index_y = index % p
     index_x = int((index - index_x) / p)
     matrix[index_x, index_y] = 0.5
+
+
+def heat_map_save(matrix, n, m, msg):
+    time = strftime("%m-%d_%H-%M-%S", gmtime())
+    filename = '../data/heatmap_data_{}_grid={}x{}_time_{}.txt'.format(msg, n, m, time)
+    print(filename)
+    np.savetxt(filename, matrix)
+    return

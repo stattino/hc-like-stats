@@ -90,14 +90,6 @@ def heat_map_alt(matrix, n, x_lim, y_lim, msg):
     return
 
 
-def heat_map_save(matrix, n, m, msg):
-    time = strftime("%m-%d_%H-%M-%S", gmtime())
-    filename = '../data/heatmap_data_{}_grid={}x{}_time_{}.txt'.format(msg, n, m, time)
-    print(filename)
-    np.savetxt(filename, matrix)
-    return
-
-
 def visualize_regions():
     halves = 0.5*np.array([1, 1])
     axes = np.array([0, 1])
@@ -116,6 +108,55 @@ def visualize_regions():
     y = detection_bound(x)
     plt.fill_between(x, y, np.zeros(1000), facecolor='b')
     plt.plot(x, y, color='r')
+    plt.show()
+    return
+
+
+def visualize_regions_all():
+
+    plt.xlabel(r'$\beta$')
+    plt.ylabel(r'$r$')
+    plt.title('Regions in phase diagram')
+    plt.grid(color='silver', linestyle='--')
+    plt.axis([0, 1, 0, 4])
+    halves = 0.5*np.array([1, 1])
+    axes = np.array([0, 1])
+    plt.text(0.5, 3.5, 'Exactly recoverable')
+    plt.text(0.2, 1.5, 'Almost fully recoverable')
+    plt.text(0.4, 0.35, 'Not recoverable but detectable')
+    plt.text(0.8, 0.1, 'Undetectable')
+
+
+    def exrec(xx):
+        return np.power((1 + np.sqrt(1 - xx)), 2)
+
+    def alrec(xx):
+        return xx
+
+    def f(xx):
+        if xx < 1/2:
+            return 0 + xx - xx
+        elif xx < 3/4:
+            return xx - 0.5
+        elif xx < 1:
+            return np.power((1 - np.sqrt(1-xx)), 2)
+
+    detection_bound = np.vectorize(f)
+    exactly_recoverable = np.vectorize(exrec)
+    almost_recoverable = np.vectorize(alrec)
+
+    x = np.linspace(0, 1, 1000)
+    y = detection_bound(x)
+    #plt.fill_between(x, y, np.zeros(1000), facecolor='b')
+    plt.plot(x, y, color='b')
+
+    y = exactly_recoverable(x)
+    plt.plot(x, y, color='r')
+
+    y = almost_recoverable(x)
+    plt.plot(x, y, color='g', linestyle='-.')
+    plt.plot(axes, np.array([0, 0]), color='k')
+    plt.plot(np.array([0, 0]), np.array([0, 4]), color='k')
     plt.show()
     return
 

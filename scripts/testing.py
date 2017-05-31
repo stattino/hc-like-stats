@@ -25,13 +25,41 @@ i, hc = hc_orthodox(A, beta, r, dist, plot_option)
 i_plus, hc_plus = hc_plus(A, beta, r, dist, plot_option)
 i_cs, hc_cs = hc_cscshm(A, beta, r, dist, plot_option)
 
-
-"""
-
-matrix = np.loadtxt('pdcresults/heatmap_data_CsCsHM_2_theta=0.15_grid=59x59_time_05-07_08-40-20.txt')
+matrix = np.loadtxt('../data/heatmap_data_CsCsHM_1_m1=10_n=100_grid=10x10_time_05-25_11-21-08.txt')
 normalize_colors(matrix)
 theta = 0.15
 x_lim = np.array([0, 1-theta])
 y_lim = np.array([0, 1])
 p = 100
-heat_map_alt(matrix, p, x_lim, y_lim, 'TESTING')
+"""
+n = 100
+
+#heat_map_alt(matrix, p, x_lim, y_lim, 'TESTING')
+dense_error_matrix = np.loadtxt('../data/heatmap_data_CsCsHM2_m1=10_n=100_grid=35x35_time_05-25_11-39-46.txt')
+normalize_colors(dense_error_matrix)
+x_lim = np.array([0, 0.5])
+y_lim = np.array([0, 0.5])
+heat_map_alt(dense_error_matrix, n, x_lim, y_lim, 'TESTING')
+
+sparse_error_matrix = np.loadtxt('../data/heatmap_data_CsCsHM2_m1=10_n=100_grid=70x70_time_05-25_11-39-46.txt')
+normalize_colors(sparse_error_matrix)
+x_lim = np.array([0.5, 1])
+y_lim = np.array([0, 1])
+heat_map_alt(sparse_error_matrix, n, x_lim, y_lim, 'test_test')
+
+
+
+
+"""
+dense_error_matrix = np.loadtxt('../data/heatmap_data_CsCsHM_1_m1=10_n=100_grid=10x10_time_05-25_11-21-08.txt')
+normalize_colors(dense_error_matrix)
+x_lim = np.array([0, 0.5])
+y_lim = np.array([0, 0.5])
+heat_map_alt(dense_error_matrix, n, x_lim, y_lim, 'TESTING')
+
+sparse_error_matrix = np.loadtxt('../data/heatmap_data_CsCsHM_1_m1=10_n=100_grid=10x10_time_05-25_11-21-08.txt')
+normalize_colors(sparse_error_matrix)
+x_lim = np.array([0.5, 1])
+y_lim = np.array([0, 1])
+heat_map_alt(sparse_error_matrix, n, x_lim, y_lim, 'test_test')
+"""

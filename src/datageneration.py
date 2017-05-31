@@ -20,7 +20,8 @@ def generate_normal_mixture(n, beta, r, signal_presence):
         mu0 = np.power(n, -r)
     x = np.random.normal(0, 1, n)
     if signal_presence == 1:
-        n_signals = np.ceil(epsilon*n)
+        n_signals = int(np.ceil(epsilon*n))
+        n = int(n)
         index = np.random.choice(n, n_signals, False)
         x[index] = np.random.normal(mu0, 1, n_signals)
     return x
@@ -34,7 +35,8 @@ def generate_chi2_mixture(n, beta, r, signal_presence, df=1, location=0):
         w0 = np.power(n, -2*r)
     x = chi2.rvs(df, location, 1, n)
     if signal_presence == 1:
-        n_signals = np.ceil(epsilon*n)
+        n_signals = int(np.ceil(epsilon*n))
+        n = int(n)
         index = np.random.choice(n, n_signals, False)
         x[index] = chi2.rvs(df, location+w0, 1, n_signals)
     return x
@@ -42,13 +44,12 @@ def generate_chi2_mixture(n, beta, r, signal_presence, df=1, location=0):
 
 def generate_classification_data(p, theta, beta, r, balance=0.5):
     n = int(np.ceil(2 * np.power(p, theta)))
-    if p < 2*n:
-        print('...not considering p>>n...')
+
     tau = np.sqrt(2 * r * np.log(p))
     epsilon = np.power(p, -beta)
     mu0 = tau/np.sqrt(n)
 
-    n_signals = np.ceil(epsilon * p)
+    n_signals = int(np.ceil(epsilon * p))
     index = np.random.choice(p, n_signals, False)
 
     x_train = np.zeros([n, p])
@@ -56,7 +57,7 @@ def generate_classification_data(p, theta, beta, r, balance=0.5):
     x_test = np.zeros([n, p])
     y_test = np.ones(n)
 
-    n_class_2 = np.ceil(balance*n)
+    n_class_2 = int(np.ceil(balance*n))
     index_class_2 = np.random.choice(n, n_class_2, False)
 
     y_train[index_class_2] *= -1
@@ -64,7 +65,38 @@ def generate_classification_data(p, theta, beta, r, balance=0.5):
 
     for i in range(0, n):
         x_train[i, ] = np.random.normal(0, 1, p)
-        x_train[i, index] = np.random.normal(mu0*y_train[i], 1, n_signals)
+        x_train[i, index] = np.random.normal(mu0 * y_train[i], 1, n_signals)
+        x_test[i,] = np.random.normal(0, 1, p)
+        x_test[i, index] = np.random.normal(mu0 * y_test[i], 1, n_signals)
+
+    return x_train, y_train, x_test, y_test
+
+
+def generate_classification_data_cscshm(p, theta, beta, r, balance=0.5):
+    n = int(np.ceil(2 * np.power(p, theta)))
+    if p < 2*n:
+        print('...not considering p>>n...')
+    tau = np.sqrt(2 * r * np.log(p))
+    epsilon = np.power(p, -beta)
+    mu0 = 2*tau/np.sqrt(n)   # *2 ???
+
+    n_signals = int(np.ceil(epsilon * p))
+    index = np.random.choice(p, n_signals, False)
+
+    x_train = np.zeros([n, p])
+    y_train = np.zeros(n)
+    x_test = np.zeros([n, p])
+    y_test = np.zeros(n)
+
+    n_class_2 = int(np.ceil(balance*n))
+    index_class_2 = np.random.choice(n, n_class_2, False)
+
+    y_train[index_class_2] = 1
+    y_test[index_class_2] = 1
+
+    for i in range(0, n):
+        x_train[i, ] = np.random.normal(0, 1, p)
+        x_train[i, index] = np.random.normal(mu0 * y_train[i], 1, n_signals)
         x_test[i,] = np.random.normal(0, 1, p)
         x_test[i, index] = np.random.normal(mu0 * y_test[i], 1, n_signals)
 
