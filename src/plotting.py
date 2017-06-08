@@ -90,6 +90,31 @@ def heat_map_alt(matrix, n, x_lim, y_lim, msg):
     return
 
 
+def histogram_save(vector, msg):
+    n = vector.shape[0]
+    fig, ax = plt.subplots()
+    ax.hist(vector,bins=n)
+    time = strftime("%m-%d_%H-%M-%S", gmtime())
+    filename = '../plots/heatmaps/Histogram_n={}_time_{}_{}.png'.format(n, time, msg)
+    print(filename)
+    fig.savefig(filename)
+    return
+
+
+def histogram_comparison_save(matrix, title, labels, params, n, msg=''):
+    fig, ax = plt.subplots()
+    ax.hist(matrix, bins= int (n/100), stacked=False, histtype='bar', label=labels)
+    ax.legend(prop={'size': 10})
+    ax.set_title(title)
+
+    time = strftime("%m-%d_%H-%M-%S", gmtime())
+    filename = '../plots/heatmaps/Histogram_n={}_time_{}_beta={}_r={}{}.png'.format(n, time, params[0], params[1], msg)
+    print(filename)
+    fig.tight_layout()
+    fig.savefig(filename)
+    return
+
+
 def visualize_regions():
     halves = 0.5*np.array([1, 1])
     axes = np.array([0, 1])

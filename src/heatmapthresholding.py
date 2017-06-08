@@ -283,7 +283,7 @@ def calculate_p_values(x, dist):  # one sided normal/chi2 p-values
     return p_values
 
 
-def calculate_two_sided_p_values(x, dist):  # one sided normal/chi2 p-values
+def calculate_two_sided_p_values(x):  # one sided normal/chi2 p-values
     n = x.shape[0]
     p_values = np.zeros(n)
     if dist[1] == 'norm':
