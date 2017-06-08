@@ -230,8 +230,8 @@ def compute_average_error(n, beta, r, m1):
         threshold_CS = 3.03*(1 + deltas[i])
         error_sum_hc[i] = sum(hc_type_1_hc >= threshold) + sum(hc_type_2_hc < threshold)
         error_sum_CS[i] = sum(hc_type_1_CS >= threshold_CS) + sum(hc_type_2_CS < threshold_CS)
-        print('HC type 1:     ', sum(hc_type_1_hc >= threshold), ' type II: ', sum(hc_type_2_hc < threshold))
-        print('CsCsHM type 1: ', sum(hc_type_1_CS >= threshold_CS), ' type II: ', sum(hc_type_2_CS < threshold_CS))
+        #print('HC type 1:     ', sum(hc_type_1_hc >= threshold), ' type II: ', sum(hc_type_2_hc < threshold))
+        #print('CsCsHM type 1: ', sum(hc_type_1_CS >= threshold_CS), ' type II: ', sum(hc_type_2_CS < threshold_CS))
 
     # print(error_sum)
     error_hc = np.min(error_sum_hc)/m1
@@ -319,7 +319,7 @@ def find_HCs(n, beta, r, m1, m2):
 # Testing of the functions
 
 n = 10000
-m1 = 100
+m1 = 400
 dense_grid = np.array( [10, 10])
 """
 dense_hc, dense_cs = dense_region(n, dense_grid, m1)
@@ -332,7 +332,7 @@ heat_map_alt(dense_hc, n, x_lim, y_lim,'TRIAL_dense_hc')
 heat_map_alt(dense_cs, n, x_lim, y_lim, 'TRIAL_dense_cs')
 """
 
-#"""
+"""
 sparse_grid = np.array( [10, 10])
 sparse_hc, sparse_cs = sparse_region(n, sparse_grid, m1)
 
@@ -358,7 +358,7 @@ labels = [r'HC^+', r'$CsCsHM$']
 histogram_comparison_save(t_matrix.transpose(), 'Thresholds', labels, params, n)
 #"""
 
-"""
+#"""
 crit_hc, crit_cs = find_HCs(n, beta, r, m1, m2)
 
 c_matrix = np.array([[crit_hc], [crit_cs]])
