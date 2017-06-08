@@ -9,15 +9,15 @@ def hc_plus_classification(pi, alpha):
     hc_vector = np.zeros(n)
     n_float = float(n)
     trunc = np.floor(alpha * n).astype(int)
-    for i in range(1, trunc):
+    for i in range(0, trunc):
         if pi[i] > 1/n:
             #hc_vector[i] = np.sqrt(n_float) * (i/n_float - pi[i]) / np.sqrt(pi[i]*(1 - pi[i]))
-            hc_vector[i] = np.sqrt(n_float) * (i/n_float - pi[i]) / np.sqrt(i/n_float*(1 - i/n_float))
+            hc_vector[i] = np.sqrt(n_float) * ((i+1)/n_float - pi[i]) / np.sqrt((i+1)/n_float*(1 - (i+1)/n_float))
 
     i_opt = np.argmax(hc_vector)
     pi_opt = pi[i_opt]
     hc_opt = np.max(hc_vector)
-    return pi_opt, hc_opt
+    return pi_opt, hc_opt, i_opt
 
 
 def hc_thresholding(x, y, threshold='clip', alpha=0.5, stdflag=0, muflag=0):
@@ -47,12 +47,19 @@ def hc_thresholding(x, y, threshold='clip', alpha=0.5, stdflag=0, muflag=0):
     pi = calculate_two_sided_p_values(z)
     sorted_pi, sorted_index = sort_by_size(pi)
 
+    #""""
+    pi_opt, hc_opt, max_hc_ind = hc_plus_classification(sorted_pi, alpha)
+    opt_index = np.where(pi == pi_opt)
+    z_opt = z[opt_index]
+    print('For-loop: pi_opt', pi_opt, 'max_hc_ind', max_hc_ind, 'hc_opt' , hc_opt, 'opt_index', opt_index, 'zopt', z_opt)
+
+    #"""
     #"""# Vectorized version of the HC-objective function
     ind = np.where(sorted_pi <= 1/p)
     ii = (1+np.arange(p)) / (p+1)
     hc_vector = np.sqrt(p) * (ii - sorted_pi) / np.sqrt(ii - np.power(ii, 2))
     hc_vector[ind] = 0
-    hc_vector = hc_vector[1:np.floor(alpha*p).astype(int)]
+    hc_vector = hc_vector[0:np.floor(alpha*p).astype(int)]
 
     max_hc_ind = np.argmax(hc_vector)
     opt_z_index = np.where(pi == sorted_pi[max_hc_ind])
@@ -60,16 +67,9 @@ def hc_thresholding(x, y, threshold='clip', alpha=0.5, stdflag=0, muflag=0):
     pi_opt = sorted_pi[max_hc_ind]
     hc_opt = hc_vector[max_hc_ind]
     opt_index = opt_z_index
-    print('Vectorized: pi_opt', pi_opt,'hc_opt' , hc_opt, 'opt_index', opt_index, 'zopt', z_opt)
+    print('Vectorized: pi_opt', pi_opt, 'max_hc_ind', max_hc_ind, 'hc_opt' , hc_opt, 'opt_index', opt_index, 'zopt', z_opt)
     #"""
 
-    #""""
-    pi_opt, hc_opt = hc_plus_classification(sorted_pi, alpha)
-    opt_index = np.where(pi == pi_opt)
-    z_opt = z[opt_index]
-    print('For-loop: pi_opt', pi_opt,'hc_opt' , hc_opt, 'opt_index', opt_index, 'zopt', z_opt)
-
-    #"""
 
     weights = np.zeros(p)
     if threshold == 'hard':
@@ -180,14 +180,14 @@ def cscshm_thresholding(x, y, hc=1, alpha=0.5, stdflag=0):
     hc_vector = np.zeros(p)
 
     trunc = np.floor(alpha * p).astype(int)
-    for i in range(1, trunc):
+    for i in range(0, trunc):
         if sorted_pi[i] > 1 / p:
             pi_val = sorted_pi[i]
             norm = pi_val * (1 - pi_val)
             if hc == 1:
-                hc_vector[i] = np.sqrt(p) * (i/p - pi_val) / np.sqrt(norm * np.log(np.log(1 / norm)))
+                hc_vector[i] = np.sqrt(p) * ((i+1)/p - pi_val) / np.sqrt(norm * np.log(np.log(1 / norm)))
             else:
-                hc_vector[i] = np.sqrt(p) * (i/p - pi_val) / (np.sqrt(norm) * np.log(np.log(1 / norm)))
+                hc_vector[i] = np.sqrt(p) * ((i+1)/p - pi_val) / (np.sqrt(norm) * np.log(np.log(1 / norm)))
 
 
     max_hc_ind = np.argmax(hc_vector)
@@ -200,7 +200,7 @@ def cscshm_thresholding(x, y, hc=1, alpha=0.5, stdflag=0):
     # Vectorized version of finding HC
     # To be verified
     #"""
-    ii = (1+np.arange(p)) / (p+1)
+    ii = (1+np.arange(p, dtype=float)) / (p+1)
     norm_alt = sorted_pi - np.power(sorted_pi, 2)
     if hc==1:
         hc_alt = np.sqrt(p) * np.divide((ii - sorted_pi), np.sqrt(norm_alt * np.log(np.log(1/norm_alt))))
@@ -209,7 +209,7 @@ def cscshm_thresholding(x, y, hc=1, alpha=0.5, stdflag=0):
 
     ind = np.where(sorted_pi <= 1/p)
     hc_alt[ind] = 0
-    hc_alt = hc_alt[1:np.floor(alpha * p).astype(int)]
+    hc_alt = hc_alt[0:np.floor(alpha * p).astype(int)]
 
     max_hc_ind = np.argmax(hc_alt)
     opt_z_index = np.where(pi == sorted_pi[max_hc_ind])

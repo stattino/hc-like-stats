@@ -20,61 +20,133 @@ def generate_normal_mixture(n, beta, r, signal_presence):
 
 def hc_cscshm_1(x, beta, r):
     #  Csörgós Csörgós Horvath Mason
+    alpha = 0.5
     n = x.shape[0]
     pi = calculate_p_values(x)
     sorted_pi, _ = sort_by_size(pi)
+
+    """"  For-loop version of HC:
     hc_vector = np.zeros(n)
     n_float = float(n)
     alpha_0 = 1.0
     trunc = np.floor(alpha_0 * n).astype(int)
-    for i in range(1, trunc):
+    for i in range(0, trunc):
         if sorted_pi[i] > 1/n:
             pi_val = sorted_pi[i]
             norm = pi_val * (1 - pi_val)
-            hc_vector[i] = np.sqrt(n_float) * (i/n_float - pi_val) / np.sqrt(norm * np.log(np.log(1 / norm)))
+            hc_vector[i] = np.sqrt(n_float) * ((i+1)/n_float - pi_val) / np.sqrt(norm * np.log(np.log(1 / norm)))
     i_opt = np.argmax(hc_vector)
     hc_opt = np.max(hc_vector)
+    pi_opt = sorted_pi[i_opt]
+    opt_index = np.where(pi == pi_opt)
+    z_opt = x[opt_index]
+    print('For-loop: pi_opt', pi_opt, 'i_opt', i_opt, 'hc_opt', hc_opt, 'opt_index', opt_index, 'zopt', z_opt)
+    # """
+
+    # """ Vectorized version
+    ii = (1 + np.arange(n_float, dtype=float)) / (n_float + 1)
+    norm_alt = sorted_pi - np.power(sorted_pi, 2)
+    hc_alt = np.sqrt(n_float) * np.divide((ii - sorted_pi), np.sqrt(norm_alt * np.log(np.log(1 / norm_alt))))
+
+    ind = np.where(sorted_pi <= 1 / n_float)
+    hc_alt[ind] = 0
+    hc_alt = hc_alt[0:np.floor(alpha * n_float).astype(int)]
+
+    max_hc_ind = np.argmax(hc_alt)
+    opt_z_index = np.where(pi == sorted_pi[max_hc_ind])
+    z_opt = x[opt_z_index]
+    pi_opt = sorted_pi[max_hc_ind]
+    hc_opt = np.max(hc_alt)
+    print('Vectorized: pi_opt', pi_opt, 'max_hc_ind', max_hc_ind, 'hc_opt', hc_opt, 'opt_index', opt_z_index, 'zopt', z_opt)
+    # """
+
     #print('Optimal HC:', hc_opt, 'index i_opt:', i_opt)
     return i_opt, hc_opt
 
 
 def hc_cscshm_2(x, beta, r):
     #  Csörgós Csörgós Horvath Mason
+    alpha = 0.5
     n = x.shape[0]
     pi = calculate_p_values(x)
     sorted_pi, _ = sort_by_size(pi)
     hc_vector = np.zeros(n)
     n_float = float(n)
+    """ For-loop version
     alpha_0 = 0.5
     trunc = np.floor(alpha_0 * n).astype(int)
     for i in range(1, trunc):
-        #if sorted_pi[i] > 1/np.power(n, 2):
+        if sorted_pi[i] > 1/np.power(n, 2):
             pi_val = sorted_pi[i]
             norm = pi_val * (1 - pi_val)
             hc_vector[i] = np.sqrt(n_float) * (i/n_float - pi_val) / (np.sqrt(norm) * np.log(np.log(1 / norm)))
     i_opt = np.argmax(hc_vector)
     hc_opt = np.max(hc_vector)
+    pi_opt = sorted_pi[i_opt]
+    opt_index = np.where(pi == pi_opt)
+    z_opt = x[opt_index]
+    print('For-loop: pi_opt', pi_opt, 'i_opt', i_opt, 'hc_opt', hc_opt, 'opt_index', opt_index, 'zopt', z_opt)
+    # """
+
+    # """ Vectorized version
+    ii = (1 + np.arange(n_float, dtype=float)) / (n_float + 1)
+    norm_alt = sorted_pi - np.power(sorted_pi, 2)
+    hc_alt = np.sqrt(n_float) * np.divide((ii - sorted_pi), np.sqrt(norm_alt) * np.log(np.log(1 / norm_alt)))
+
+    ind = np.where(sorted_pi <= 1 / n_float)
+    hc_alt[ind] = 0
+    hc_alt = hc_alt[0:np.floor(alpha * n_float).astype(int)]
+
+    max_hc_ind = np.argmax(hc_alt)
+    opt_z_index = np.where(pi == sorted_pi[max_hc_ind])
+    z_opt = x[opt_z_index]
+    pi_opt = sorted_pi[max_hc_ind]
+    hc_opt = np.max(hc_alt)
+    #print('Vectorized: pi_opt', pi_opt, 'max_hc_ind', max_hc_ind, 'hc_opt', hc_opt, 'opt_index', opt_z_index, 'zopt',   z_opt)
+    # """
     #print('Optimal HC:', hc_opt, 'index i_opt:', i_opt)
-    return i_opt, hc_opt
+    return max_hc_ind, hc_opt
 
 
 def hc_plus(x, beta, r):
+    alpha = 0.5
     n = x.shape[0]
     pi = calculate_p_values(x)
     sorted_pi, _ = sort_by_size(pi)
     hc_vector = np.zeros(n)
     n_float = float(n)
+    """ for -loop
     alpha_0 = 0.5
     trunc = np.floor(alpha_0 * n).astype(int)
     for i in range(1, trunc):
         if sorted_pi[i] > 1/n:
             hc_vector[i] = np.sqrt(n_float) * (i/n_float - sorted_pi[i]) / np.sqrt(sorted_pi[i]*(1 - sorted_pi[i]))
 
-
     i_opt = np.argmax(hc_vector)
     hc_opt = np.max(hc_vector)
+    pi_opt = sorted_pi[i_opt]
+    opt_index = np.where(pi == pi_opt)
+    z_opt = x[opt_index]
+    print('For-loop: pi_opt', pi_opt, 'i_opt', i_opt, 'hc_opt', hc_opt, 'opt_index', opt_index, 'zopt', z_opt)
+    # """
+
+    # """# Vectorized version of the HC-objective function
+    ind = np.where(sorted_pi <= 1 / n_float)
+    ii = (1 + np.arange(n_float)) / (n_float + 1)
+    hc_vector = np.sqrt(n_float) * (ii - sorted_pi) / np.sqrt(ii - np.power(ii, 2))
+    hc_vector[ind] = 0
+    hc_vector = hc_vector[0:np.floor(alpha * n_float).astype(int)]
+
+    max_hc_ind = np.argmax(hc_vector)
+    #opt_z_index = np.where(pi == sorted_pi[max_hc_ind])
+    #z_opt = x[opt_z_index]
+    #pi_opt = sorted_pi[max_hc_ind]
+    hc_opt = hc_vector[max_hc_ind]
+    #opt_index = opt_z_index
+    #print('Vectorized: pi_opt', pi_opt, 'max_hc_ind', max_hc_ind, 'hc_opt', hc_opt, 'opt_index', opt_index, 'zopt',z_opt)
+
     #print('Optimal HC:', hc_opt, 'index i_opt:', i_opt)
-    return i_opt, hc_opt
+    return max_hc_ind, hc_opt
 
 
 def calculate_p_values(x):
@@ -155,15 +227,15 @@ def compute_average_error(n, beta, r, m1):
     print(beta, r)
     for i in range(0, 10):
         threshold = np.sqrt(2 * (1 + deltas[i]) * np.log(np.log(n)))
-        threshold_CS = 1.86*np.sqrt(1 + 2*deltas[i])
+        threshold_CS = 3.03*(1 + deltas[i])
         error_sum_hc[i] = sum(hc_type_1_hc >= threshold) + sum(hc_type_2_hc < threshold)
         error_sum_CS[i] = sum(hc_type_1_CS >= threshold_CS) + sum(hc_type_2_CS < threshold_CS)
         print('HC type 1:     ', sum(hc_type_1_hc >= threshold), ' type II: ', sum(hc_type_2_hc < threshold))
         print('CsCsHM type 1: ', sum(hc_type_1_CS >= threshold_CS), ' type II: ', sum(hc_type_2_CS < threshold_CS))
 
     # print(error_sum)
-    error_hc = min(error_sum_hc)/m1
-    error_cs = min(error_sum_CS)/m1
+    error_hc = np.min(error_sum_hc)/m1
+    error_cs = np.min(error_sum_CS)/m1
     return error_hc, error_cs
 
 def find_thresholds(n, beta, r, m1, m2):
@@ -206,7 +278,7 @@ def find_thresholds(n, beta, r, m1, m2):
         i_opt_cs = np.argmin(error_sum_CS)
         i_opt_hc = np.argmin(error_sum_hc)
         chosen_threshold_hc[j] = np.sqrt(2 * (1 + deltas[i_opt_hc]) * np.log(np.log(n)))
-        chosen_threshold_cs[j] = 1.86 * np.sqrt(1 + 2*deltas[i_opt_cs])
+        chosen_threshold_cs[j] = 3.03 * np.sqrt(1 + 2*deltas[i_opt_cs])
 
     return chosen_threshold_hc, chosen_threshold_cs
 
@@ -246,7 +318,7 @@ def find_HCs(n, beta, r, m1, m2):
 
 # Testing of the functions
 
-n = 500
+n = 10000
 m1 = 100
 dense_grid = np.array( [10, 10])
 """
@@ -259,12 +331,8 @@ y_lim = np.array([0, 0.5])
 heat_map_alt(dense_hc, n, x_lim, y_lim,'TRIAL_dense_hc')
 heat_map_alt(dense_cs, n, x_lim, y_lim, 'TRIAL_dense_cs')
 """
-n = 100000
-m1 = 100
-m2 = 10
 
-
-"""
+#"""
 sparse_grid = np.array( [10, 10])
 sparse_hc, sparse_cs = sparse_region(n, sparse_grid, m1)
 
@@ -274,9 +342,11 @@ x_lim = np.array([0.5, 1])
 y_lim = np.array([0, 1])
 heat_map_alt(sparse_hc, n, x_lim, y_lim, 'TRIAL_sparse_hc')
 heat_map_alt(sparse_cs, n, x_lim, y_lim, 'TRIAL_sparse_cs')
-"""
+#"""
 
-
+n = 100000
+m1 = 100
+m2 = 10
 beta = 0.6
 r = 0.6
 params = [beta, r]
@@ -288,7 +358,7 @@ labels = [r'HC^+', r'$CsCsHM$']
 histogram_comparison_save(t_matrix.transpose(), 'Thresholds', labels, params, n)
 #"""
 
-#"""
+"""
 crit_hc, crit_cs = find_HCs(n, beta, r, m1, m2)
 
 c_matrix = np.array([[crit_hc], [crit_cs]])
