@@ -103,7 +103,7 @@ def histogram_save(vector, msg):
 
 def histogram_comparison_save(matrix, title, labels, params, n, msg=''):
     fig, ax = plt.subplots()
-    ax.hist(matrix, bins= int (n/100), stacked=False, histtype='bar', label=labels)
+    ax.hist(matrix, bins= 32, stacked=False, histtype='bar', label=labels)
     ax.legend(prop={'size': 10})
     ax.set_title(title)
 
@@ -135,7 +135,6 @@ def visualize_regions():
     plt.plot(x, y, color='r')
     plt.show()
     return
-
 
 def visualize_regions_all():
 
@@ -170,18 +169,34 @@ def visualize_regions_all():
     exactly_recoverable = np.vectorize(exrec)
     almost_recoverable = np.vectorize(alrec)
 
+    #trans = mtransforms.blended_transform_factory(ax.transData, ax.transAxes)
+
     x = np.linspace(0, 1, 1000)
-    y = detection_bound(x)
+    y_detection = detection_bound(x)
     #plt.fill_between(x, y, np.zeros(1000), facecolor='b')
-    plt.plot(x, y, color='b')
+    plt.plot(x, y_detection, color='r')
+    plt.fill_between(x, 0, y_detection, facecolor='red', alpha=0.5)#, transform=trans)
 
-    y = exactly_recoverable(x)
-    plt.plot(x, y, color='r')
+    y_almost = almost_recoverable(x)
+    plt.plot(x, y_almost, color='y', linestyle='-.')
+    plt.fill_between(x, y_detection, y_almost, facecolor='yellow', alpha=0.5)#, transform=trans)
 
-    y = almost_recoverable(x)
-    plt.plot(x, y, color='g', linestyle='-.')
+
+    y_exactly = exactly_recoverable(x)
+    plt.plot(x, y_exactly, color='g')
+    plt.fill_between(x, y_almost, y_exactly, facecolor='#C5FF33', alpha=0.5)#, transform=trans)
+
+
+    plt.fill_between(x, y_exactly, 4, facecolor='green', alpha=0.5)#, transform=trans)
+
     plt.plot(axes, np.array([0, 0]), color='k')
     plt.plot(np.array([0, 0]), np.array([0, 4]), color='k')
+
+    #ax.fill_between(x, 0, 1, where=y > theta, facecolor='green', alpha=0.5, transform=trans)
+    #ax.fill_between(x, 0, 1, where=y > theta, facecolor='green', alpha=0.5, transform=trans)
+    #ax.fill_between(x, 0, 1, where=y > theta, facecolor='green', alpha=0.5, transform=trans)
+
+
     plt.show()
     return
 

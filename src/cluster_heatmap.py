@@ -1,7 +1,11 @@
+# -*- coding: utf-8 -*-
+# -*- coding: iso-8859-1 -*-
+# -*- coding: latin-1 -*-
 import numpy as np
 from scipy.stats import norm
 from plotting import *
 from detectionboundary import normalize_colors
+import os
 
 def generate_normal_mixture(n, beta, r, signal_presence):
     epsilon = np.power(n, -beta)
@@ -180,7 +184,8 @@ def sparse_region(n, grid, m1):
     sparse_cs = np.zeros(grid)
 
     grid_x = np.linspace(0.5, 1, grid[0])
-    grid_x[0] += 1/grid[0] * 1/10  # Get the sparse version of the parametrization
+    grid_norm = float (grid[0])
+    grid_x[0] += 1/grid_norm * 1/10  # Get the sparse version of the parametrization
     grid_y = np.linspace(0, 1, grid[1])
     for beta in range(0, grid[0]):
         for r in range(0, grid[1]):
@@ -224,7 +229,7 @@ def compute_average_error(n, beta, r, m1):
     deltas = 0.1*np.linspace(1, d_size, 10)
     error_sum_hc = np.zeros(10)
     error_sum_CS = np.zeros(10)
-    print(beta, r)
+    print('beta=', beta, ' r=', r)
     for i in range(0, 10):
         threshold = np.sqrt(2 * (1 + deltas[i]) * np.log(np.log(n)))
         threshold_CS = 3.03*(1 + deltas[i])
@@ -288,13 +293,14 @@ def find_HCs(n, beta, r, m1, m2):
     critical_hc = np.zeros((m2*half, 2))
     critical_CS = np.zeros((m2*half, 2))
     for j in range(0, m2):
-        print(j+1, '/', m2)
+        print('Outer loop: ', j+1, '/', m2)
         hc_type_1_hc = np.zeros(half)
         hc_type_2_hc = np.zeros(half)
         hc_type_1_CS = np.zeros(half)
         hc_type_2_CS = np.zeros(half)
         for i in range(0, half):
-            print(i+1, '/', half)
+            #if ((i+1)%(half/8) == 0):
+            #    print('+ 25% ')
             x = generate_normal_mixture(n, beta, r, 0)
             _, hc_1 = hc_plus(x, beta, r)
             hc_type_1_hc[i] = hc_1
@@ -316,12 +322,20 @@ def find_HCs(n, beta, r, m1, m2):
 
     return critical_hc, critical_CS
 
+def heat_map_save(matrix, n, m, msg):
+    time = strftime("%m-%d_%H-%M-%S", gmtime())
+    filename = '../data/heatmap_data_{}_grid={}x{}_time_{}.txt'.format(msg, n, m, time)
+    print(filename)
+    np.savetxt(filename, matrix)
+    return
+
 # Testing of the functions
 
 n = 10000
-m1 = 400
-dense_grid = np.array( [10, 10])
+m1 = 500
 """
+dense_grid = np.array( [10, 10])
+
 dense_hc, dense_cs = dense_region(n, dense_grid, m1)
 
 normalize_colors(dense_hc)
@@ -330,7 +344,7 @@ x_lim = np.array([0, 0.5])
 y_lim = np.array([0, 0.5])
 heat_map_alt(dense_hc, n, x_lim, y_lim,'TRIAL_dense_hc')
 heat_map_alt(dense_cs, n, x_lim, y_lim, 'TRIAL_dense_cs')
-"""
+#"""
 
 """
 sparse_grid = np.array( [10, 10])
@@ -340,14 +354,19 @@ normalize_colors(sparse_hc)
 normalize_colors(sparse_cs)
 x_lim = np.array([0.5, 1])
 y_lim = np.array([0, 1])
-heat_map_alt(sparse_hc, n, x_lim, y_lim, 'TRIAL_sparse_hc')
-heat_map_alt(sparse_cs, n, x_lim, y_lim, 'TRIAL_sparse_cs')
+
+
+heat_map_save(sparse_hc, n, m1, 'TRIAL_sparse_HC')
+heat_map_save(sparse_cs, n, m1, 'TRIAL_sparse_CsCsHM')
+
+#heat_map_alt(sparse_hc, n, x_lim, y_lim, 'TRIAL_sparse_hc')
+#heat_map_alt(sparse_cs, n, x_lim, y_lim, 'TRIAL_sparse_cs')
 #"""
 
-n = 100000
+n = 10000
 m1 = 100
-m2 = 10
-beta = 0.6
+m2 = 20
+beta = 0.85
 r = 0.6
 params = [beta, r]
 """
@@ -358,13 +377,61 @@ labels = [r'HC^+', r'$CsCsHM$']
 histogram_comparison_save(t_matrix.transpose(), 'Thresholds', labels, params, n)
 #"""
 
-#"""
+"""
 crit_hc, crit_cs = find_HCs(n, beta, r, m1, m2)
 
-c_matrix = np.array([[crit_hc], [crit_cs]])
+#c_matrix = np.array([[crit_hc], [crit_cs]])
 
 labels = [r'$H_0$ true ', r'$H_1$ true']
 #histogram_comparison_save(c_matrix, 'comparison')
 histogram_comparison_save(crit_hc, r'critical values for $HC^+$', labels, params, n)
 histogram_comparison_save(crit_cs, r'critical values for $CsCsHM$', labels, params, n)
+#"""
+
+# Saving files in this folder as plots
+#"""
+x_lim = np.array([0.5, 1])
+y_lim = np.array([0, 1])
+
+for fn in os.listdir('.'):
+    if fn.endswith('.txt') and fn.startswith('heatmap_data_TRIAL'):
+        print(fn)
+        if 'dense' in fn:
+            x_lim = np.array([0, 0.5])
+            y_lim = np.array([0, 0.5])
+        else:
+            x_lim = np.array([0.5, 1])
+            y_lim = np.array([0, 1])
+        mat = np.loadtxt(fn)
+        heat_map_alt(mat, n, x_lim, y_lim, fn)
+
+#"""
+
+
+"""
+
+n = 1000
+m1 = 100
+m2 = 10
+labels = [r'$H_0$ true ', r'$H_1$ true']
+
+# Sparse Beta and R:s
+beta_vec = np.array([0.55, 0.75, 0.9])
+r_vec = np.array([0.3, 0.6, 0.9])
+
+# Dense Beta and R:s
+beta_vec = np.array([0.1, 0.25, 0.4])
+r_vec = np.array([0.1, 0.25, 0.4])
+
+
+for n in [1000, 10000, 100000]:
+    for beta in beta_vec:
+        for r in r_vec:
+            print(beta, r)
+            params = [beta, r]
+            crit_hc, crit_cs = find_HCs(n, beta, r, m1, m2)
+            # histogram_comparison_save(c_matrix, 'comparison')
+            histogram_comparison_save(crit_hc, r'critical values for $HC^+$', labels, params, n, 'EXPLORE_HC')
+            histogram_comparison_save(crit_cs, r'critical values for $CsCsHM$', labels, params, n, 'EXPLORE_CS')
+
 #"""

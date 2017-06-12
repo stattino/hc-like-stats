@@ -47,7 +47,7 @@ def hc_thresholding(x, y, threshold='clip', alpha=0.5, stdflag=0, muflag=0):
     pi = calculate_two_sided_p_values(z)
     sorted_pi, sorted_index = sort_by_size(pi)
 
-    #""""
+    """"
     pi_opt, hc_opt, max_hc_ind = hc_plus_classification(sorted_pi, alpha)
     opt_index = np.where(pi == pi_opt)
     z_opt = z[opt_index]
@@ -67,7 +67,7 @@ def hc_thresholding(x, y, threshold='clip', alpha=0.5, stdflag=0, muflag=0):
     pi_opt = sorted_pi[max_hc_ind]
     hc_opt = hc_vector[max_hc_ind]
     opt_index = opt_z_index
-    print('Vectorized: pi_opt', pi_opt, 'max_hc_ind', max_hc_ind, 'hc_opt' , hc_opt, 'opt_index', opt_index, 'zopt', z_opt)
+    #print('Vectorized: pi_opt', pi_opt, 'max_hc_ind', max_hc_ind, 'hc_opt' , hc_opt, 'opt_index', opt_index, 'zopt', z_opt)
     #"""
 
 
@@ -109,7 +109,7 @@ def discriminant_rule(weights, x, mu1, mu2, std_est):
 def hc_cscshm_1(x):
     #  Csörgós Csörgós Horvath Mason
     n = x.shape[0]
-    pi = calculate_p_values(x, dist)
+    pi = calculate_p_values(x)
     sorted_pi, _ = sort_by_size(pi)
     hc_vector = np.zeros(n)
     n_float = float(n)
@@ -177,6 +177,7 @@ def cscshm_thresholding(x, y, hc=1, alpha=0.5, stdflag=0):
     # Finding the threshold
     pi = calculate_p_values(z)
     sorted_pi, sorted_index = sort_by_size(pi)
+    """
     hc_vector = np.zeros(p)
 
     trunc = np.floor(alpha * p).astype(int)
@@ -196,7 +197,7 @@ def cscshm_thresholding(x, y, hc=1, alpha=0.5, stdflag=0):
     opt_index = np.where(pi == pi_opt)
     z_opt = z[opt_index]
     print('For-loop: pi_opt', pi_opt, 'max_hc_ind', max_hc_ind,'hc_opt', hc_opt, 'opt_index', opt_index, 'zopt', z_opt)
-
+    # """
     # Vectorized version of finding HC
     # To be verified
     #"""
@@ -216,11 +217,8 @@ def cscshm_thresholding(x, y, hc=1, alpha=0.5, stdflag=0):
     z_opt = z[opt_z_index]
     pi_opt = sorted_pi[max_hc_ind]
     hc_opt = np.max(hc_alt)
-    print('Vectorized: pi_opt', pi_opt, 'max_hc_ind', max_hc_ind, 'hc_opt', hc_opt, 'opt_index', opt_z_index, 'zopt', z_opt)
-
+    #print('Vectorized: pi_opt', pi_opt, 'max_hc_ind', max_hc_ind, 'hc_opt', hc_opt, 'opt_index', opt_z_index, 'zopt', z_opt)
     #"""
-
-
     selection_vec = (abs(z) > z_opt)
 
     selection_vec = selection_vec.astype(int)
