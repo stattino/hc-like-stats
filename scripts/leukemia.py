@@ -1,5 +1,4 @@
-from detectionboundary import *
-import numpy as np
+from realthresholding import *
 
 # Import the data set
 X_train = np.loadtxt('../../data/leukemia/ALL_vs_AML_train_set_38_matrix.txt')
@@ -21,7 +20,7 @@ Y_test = np.concatenate([np.ones(21), np.multiply(np.ones(14),-1)])
 
 
 # Train the classifier on training data
-z_opt, weights, mu1, mu2, std = hc_thresholding(np.transpose(X_train), np.transpose(Y_train), 0, 0, hc_plus_classification, 'hard')
+z_opt, weights, mu1, mu2, std = hc_thresholding(np.transpose(X_train), np.transpose(Y_train))
 
 # Test the classifier on the test data
 y_attempt = discriminant_rule(weights, np.transpose(X_test), mu1, mu2, std)
@@ -71,8 +70,9 @@ for j in range(0, M_2):
             test_idx = index[i * chunk_size:]
         train_idx = np.delete(index, test_idx, 0)
 
+
         # HC_plus
-        z_opt, weights, mu1, mu2, std = hc_thresholding(np.transpose(X[:, train_idx]), np.transpose(Y[train_idx]), 0, 0, 'default', 'hard', z_type)
+        z_opt, weights, mu1, mu2, std = hc_thresholding(np.transpose(X[:, train_idx]), np.transpose(Y[train_idx]))
         y_attempt = discriminant_rule(weights, np.transpose(X[:, test_idx]), mu1, mu2, std)
         y_test = Y[test_idx]
 
@@ -83,14 +83,14 @@ for j in range(0, M_2):
 
         y_test = Y_cs[test_idx]
         # CSCSHM
-        selected, mu1, mu2, std = cscshm_thresholding(np.transpose(X[:, train_idx]), np.transpose(Y_cs[train_idx]), 0, 0, 1, z_type)
+        selected, mu1, mu2, std = cscshm_thresholding(np.transpose(X[:, train_idx]), np.transpose(Y_cs[train_idx]), 1)
         y_attempt = cscshm_discriminant_rule(np.transpose(X[:, test_idx]), selected, mu1, mu2, std)
 
         error_cs1[j, i] = sum(y_attempt != y_test) / y_test.shape
         no_var_cs1[j, i] = sum(selected != 0)
         #print('Error cs1= ', error_cs1[i], 'size', y_test.shape, 'total errors:', sum(y_attempt != y_test))
 
-        selected, mu1, mu2, std = cscshm_thresholding(np.transpose(X[:, train_idx]), np.transpose(Y_cs[train_idx]), 0, 0, 2, z_type)
+        selected, mu1, mu2, std = cscshm_thresholding(np.transpose(X[:, train_idx]), np.transpose(Y_cs[train_idx]), 2)
         y_attempt = cscshm_discriminant_rule(np.transpose(X[:, test_idx]), selected, mu1, mu2, std)
 
         error_cs2[j, i] = sum(y_attempt != y_test) / y_test.shape
@@ -119,9 +119,21 @@ est_no_var_hc = np.sum(mean_no_var_hc) / M_2
 est_no_var_cs1 = np.sum(mean_no_var_cs1) / M_2
 est_no_var_cs2 = np.sum(mean_no_var_cs2) / M_2
 
-print('tot error hc:', est_error_hc, ' +- ', std_error_hc)
-print('tot error cscshm1:', est_error_cs1, ' +- ', std_error_cs1)
-print('tot error cscshm2:', est_error_cs2, ' +- ', std_error_cs2)
 
-print('Mean no. variables selected: HC ', est_no_var_hc, ' Cs_1 ', est_no_var_cs1, ' Cs_2 ', est_no_var_cs2)
+std_no_var_hc = np.std(mean_no_var_hc)
+std_no_var_cs1 = np.std(mean_no_var_cs1)
+std_no_var_cs2 = np.std(mean_no_var_cs2)
+
+print('---- HC plus ------------------------')
+print('tot error:', est_error_hc, ' +- ', std_error_hc)
+print('Mean no. variables selected: ', est_no_var_hc, ' +- ', std_no_var_hc)
+
+print('---- CsCsHM 1 ------------------------')
+print('tot error cscshm1:', est_error_cs1, ' +- ', std_error_cs1)
+print('Mean no. variables selected: ', est_no_var_cs1, ' +- ', std_no_var_cs1)
+
+print('---- CsCsHM 2 ------------------------')
+print('tot error:', est_error_cs2, ' +- ', std_error_cs2)
+print('Mean no. variables selected: ', est_no_var_cs2, ' +- ', std_no_var_cs2)
+
 print('Size of data:', X.shape)
