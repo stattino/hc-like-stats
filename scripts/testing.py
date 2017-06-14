@@ -1,36 +1,21 @@
-import numpy as np
-from datageneration import *
-from highercrit import *
-from datageneration import *
 from plotting import *
-from detectionboundary import *
 
  # Data for testing
-N = 1000
-beta = 0.8
-r = 0.4
+N = 100000
+beta = 0.6
+r = 0.7
 signal_presence = 1
+alpha_cs = 0.1
+alpha_hc = 0.5
+#visualize_regions_theta([0, 0.2, 0.4])
+#"""
+A = generate_normal_mixture(N, beta, r, signal_presence)
 
-df = 1
-location = 0
-dist = {1: 'norm'}
-# dist = {1: 'chi2', 'df': 1, 'loc': 0}
-"""
-A = generate_data(N, beta, r, signal_presence, dist)
-#A = generate_normal_mixture(N, beta, r)
-#A = generate_chi2_mixture(N, beta, r, df, location)
-plot_option = 1
+i_plus, hc_plus = hc_plus(A, beta, r, alpha_hc, 1)
+i_cs1, crit_cs1 = hc_cscshm_1(A, beta, r, alpha_cs)
+i_cs2, crit_cs2 = hc_cscshm_2(A, beta, r, alpha_cs)
 
-i, hc = hc_orthodox(A, beta, r, dist, plot_option)
-i_plus, hc_plus = hc_plus(A, beta, r, dist, plot_option)
-i_cs, hc_cs = hc_cscshm(A, beta, r, dist, plot_option)
-
-matrix = np.loadtxt('../data/heatmap_data_CsCsHM_1_m1=10_n=100_grid=10x10_time_05-25_11-21-08.txt')
-normalize_colors(matrix)
-theta = 0.15
-x_lim = np.array([0, 1-theta])
-y_lim = np.array([0, 1])
-p = 100
+#"""
 """
 n = 100
 
@@ -46,7 +31,7 @@ normalize_colors(sparse_error_matrix)
 x_lim = np.array([0.5, 1])
 y_lim = np.array([0, 1])
 heat_map_alt(sparse_error_matrix, n, x_lim, y_lim, 'test_test')
-
+"""
 
 
 

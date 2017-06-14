@@ -6,9 +6,10 @@ from plotting import *
 M = 10
 K = 10
 beta = 0.5
-p = 10000
+p = 1000
 theta = 0.3
-alpha = 1
+alpha_cscshm = 1
+alpha_hc = 1
 
 error_hc = np.zeros((K, M))
 error_cs1 = np.zeros((K, M))
@@ -17,7 +18,7 @@ no_var_hc = np.zeros((K, M))
 no_var_cs1 = np.zeros((K, M))
 no_var_cs2 = np.zeros((K, M))
 
-r_range = np.linspace(0.3, 1, K)
+r_range = np.linspace(0, 1, K)
 
 for i in range(0, K):
     print('outer iteration', i+1, '/', K)
@@ -25,7 +26,7 @@ for i in range(0, K):
     for j in range(0, M):
         #HC_PLUS
         x_train, y_train, x_test, y_test = generate_classification_data(p, theta, beta, r)
-        weights = hc_thresholding(x_train, y_train, alpha)
+        weights = hc_thresholding(x_train, y_train, alpha_hc)
         y_attempt = discriminant_rule(x_test, weights)
 
         error_hc[i, j] = sum(y_attempt != y_test) / y_test.shape
@@ -34,12 +35,12 @@ for i in range(0, K):
         # CSCSHM_1 + CSCSHM_2
         x_train, y_train, x_test, y_test = generate_classification_data_cscshm(p, theta, beta, r)
 
-        selected = cscshm_thresholding(x_train, y_train, 1, alpha)
+        selected = cscshm_thresholding(x_train, y_train, 1, alpha_cscshm)
         y_attempt = cscshm_discriminant_rule(x_test, selected, r)
         error_cs1[i, j] = sum(y_attempt != y_test) / y_test.shape
         no_var_cs1[i, j] = sum(selected != 0)
 
-        selected = cscshm_thresholding(x_train, y_train, 2, alpha)
+        selected = cscshm_thresholding(x_train, y_train, 2, alpha_cscshm)
         y_attempt = cscshm_discriminant_rule(x_test, selected, r)
         error_cs2[i, j] = sum(y_attempt != y_test) / y_test.shape
         no_var_cs2[i, j] = sum(selected != 0)
@@ -49,25 +50,17 @@ mean_error_hc = np.sum(error_hc, 1) / M
 mean_error_cs1 = np.sum(error_cs1, 1) / M
 mean_error_cs2 = np.sum(error_cs2, 1) / M
 
-est_error_hc = np.sum(mean_error_hc) / K
-est_error_cs1 = np.sum(mean_error_cs1) / K
-est_error_cs2 = np.sum(mean_error_cs2) / K
-
-std_error_hc = np.std(mean_error_hc)
-std_error_cs1 = np.std(mean_error_cs1)
-std_error_cs2 = np.std(mean_error_cs2)
+std_error_hc = np.std(error_hc, 1)
+std_error_cs1 = np.std(error_cs1, 1)
+std_error_cs2 = np.std(error_cs2, 1)
 
 mean_no_var_hc = np.sum(no_var_hc, 1) / M
 mean_no_var_cs1 = np.sum(no_var_cs1, 1) / M
 mean_no_var_cs2 = np.sum(no_var_cs2, 1) / M
 
-est_no_var_hc = np.sum(mean_no_var_hc) / K
-est_no_var_cs1 = np.sum(mean_no_var_cs1) / K
-est_no_var_cs2 = np.sum(mean_no_var_cs2) / K
-
-std_no_var_hc = np.std(mean_no_var_hc)
-std_no_var_cs1 = np.std(mean_no_var_cs1)
-std_no_var_cs2 = np.std(mean_no_var_cs2)
+std_no_var_hc = np.std(no_var_hc, 1)
+std_no_var_cs1 = np.std(no_var_cs1, 1)
+std_no_var_cs2 = np.std(no_var_cs2, 1)
 
 # Visualize as a plot with STD-bars:
 
@@ -85,6 +78,7 @@ ax.errorbar(r_range, mean_error_cs1, xerr=0, yerr=std_error_cs1,
 
 ax.set_ylabel('Mean error')
 ax.set_xlabel(r'$r$')
+ax.grid(color='silver', linestyle='--')
 
 handles, labels = ax.get_legend_handles_labels()
 ax.legend(handles, labels)
@@ -101,8 +95,12 @@ ax.errorbar(r_range, mean_no_var_cs1, xerr=0, yerr=std_no_var_cs1,
 
 ax.set_ylabel('Mean n. variables')
 ax.set_xlabel(r'$r$')
+ax.grid(color='silver', linestyle='--')
 
 handles, labels = ax.get_legend_handles_labels()
 ax.legend(handles, labels)
+
+filename = '../plots/heatmaps/R-Errorbars_M={}_K={}_p_{}_beta={}_theta={}_alphacs={}_alphahc={}.png'.format(M, K, p, beta, theta, alpha_cscshm, alpha_hc)
+fig.savefig(filename)
 
 plt.show()
