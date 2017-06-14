@@ -3,9 +3,11 @@
 # -*- coding: latin-1 -*-
 import numpy as np
 from scipy.stats import norm
-from plotting import *
+from plotting import histogram_comparison_save, heat_map_alt
 from detectionboundary import normalize_colors
 import os
+from time import gmtime, strftime
+
 
 def generate_normal_mixture(n, beta, r, signal_presence):
     epsilon = np.power(n, -beta)
@@ -22,9 +24,8 @@ def generate_normal_mixture(n, beta, r, signal_presence):
     return x
 
 
-def hc_cscshm_1(x, beta, r):
+def hc_cscshm_1(x, beta, r, alpha=0.5):
     #  Csörgós Csörgós Horvath Mason
-    alpha = 0.5
     n = x.shape[0]
     pi = calculate_p_values(x)
     sorted_pi, _ = sort_by_size(pi)
@@ -68,9 +69,8 @@ def hc_cscshm_1(x, beta, r):
     return i_opt, hc_opt
 
 
-def hc_cscshm_2(x, beta, r):
+def hc_cscshm_2(x, beta, r, alpha=0.5):
     #  Csörgós Csörgós Horvath Mason
-    alpha = 0.5
     n = x.shape[0]
     pi = calculate_p_values(x)
     sorted_pi, _ = sort_by_size(pi)
@@ -97,8 +97,10 @@ def hc_cscshm_2(x, beta, r):
     norm_alt = sorted_pi - np.power(sorted_pi, 2)
     hc_alt = np.sqrt(n_float) * np.divide((ii - sorted_pi), np.sqrt(norm_alt) * np.log(np.log(1 / norm_alt)))
 
-    ind = np.where(sorted_pi <= 1 / n_float)
-    hc_alt[ind] = 0
+    #ind = np.where(sorted_pi <= 1 / n_float)
+    #hc_alt[ind] = 0
+
+
     hc_alt = hc_alt[0:np.floor(alpha * n_float).astype(int)]
 
     max_hc_ind = np.argmax(hc_alt)
@@ -112,8 +114,7 @@ def hc_cscshm_2(x, beta, r):
     return max_hc_ind, hc_opt
 
 
-def hc_plus(x, beta, r):
-    alpha = 0.5
+def hc_plus(x, beta, r, alpha=0.5, orthodox=0):
     n = x.shape[0]
     pi = calculate_p_values(x)
     sorted_pi, _ = sort_by_size(pi)
@@ -134,11 +135,17 @@ def hc_plus(x, beta, r):
     print('For-loop: pi_opt', pi_opt, 'i_opt', i_opt, 'hc_opt', hc_opt, 'opt_index', opt_index, 'zopt', z_opt)
     # """
 
-    # """# Vectorized version of the HC-objective function
     ind = np.where(sorted_pi <= 1 / n_float)
+
     ii = (1 + np.arange(n_float)) / (n_float + 1)
+
+    #hc_vector = np.sqrt(n_float) * (ii - sorted_pi) / np.sqrt(sorted_pi - np.power(sorted_pi, 2))
+
     hc_vector = np.sqrt(n_float) * (ii - sorted_pi) / np.sqrt(ii - np.power(ii, 2))
-    hc_vector[ind] = 0
+
+    if orthodox==0:
+        hc_vector[ind] = 0
+
     hc_vector = hc_vector[0:np.floor(alpha * n_float).astype(int)]
 
     max_hc_ind = np.argmax(hc_vector)
@@ -190,6 +197,7 @@ def sparse_region(n, grid, m1):
     for beta in range(0, grid[0]):
         for r in range(0, grid[1]):
             # sparse[beta, r] = error_rate(grid_x[beta], grid_y[r], m1, m2, dist)
+            """
             if (grid_x[beta] < 0.75 and grid_y[r] < grid_x[beta]-0.5):
                 sparse_hc[beta, r] = 0.5
                 sparse_cs[beta, r] = 0.5
@@ -197,7 +205,8 @@ def sparse_region(n, grid, m1):
                 sparse_hc[beta, r] = 0.5
                 sparse_cs[beta, r] = 0.5
             else:
-                sparse_hc[beta, r], sparse_cs[beta, r] = compute_average_error(n, grid_x[beta], grid_y[r], m1)
+            """
+            sparse_hc[beta, r], sparse_cs[beta, r] = compute_average_error(n, grid_x[beta], grid_y[r], m1)
             if ((r + beta * grid[1] + 1) % (grid[0] * grid[1] / 10) == 0):
                 print('Fraction of sparse region completed', 100 * (r + beta * grid[1] + 1) / (grid[0] * grid[1]), '%')
             #print('Fraction of sparse region completed', r + beta * grid[1] + 1, '/', grid[0] * grid[1])
@@ -211,18 +220,21 @@ def compute_average_error(n, beta, r, m1):
 
     hc_type_1_CS = np.zeros(half)
     hc_type_2_CS = np.zeros(half)
+    alpha_cs = 0.1
+    alpha_hc = 0.3
+    orthodox = 0
     for i in range(0, half):
         x = generate_normal_mixture(n, beta, r, 0)
-        _, hc = hc_plus(x, beta, r)
+        _, hc = hc_plus(x, beta, r, alpha_hc, orthodox)
         hc_type_1_hc[i] = hc
-        _, hc = hc_cscshm_2(x, beta, r)
+        _, hc = hc_cscshm_2(x, beta, r, alpha_cs)
         hc_type_1_CS[i] = hc
 
         y = generate_normal_mixture(n, beta, r, 1)
-        _, hc = hc_plus(y, beta, r)
+        _, hc = hc_plus(y, beta, r, alpha_hc, orthodox)
         hc_type_2_hc[i] = hc
         #print('HC_plus: ', hc)
-        _, hc = hc_cscshm_2(y, beta, r)
+        _, hc = hc_cscshm_2(y, beta, r, alpha_cs)
         hc_type_2_CS[i] = hc
         #print('Ccshm: ', hc)
     d_size = 10
@@ -288,7 +300,7 @@ def find_thresholds(n, beta, r, m1, m2):
     return chosen_threshold_hc, chosen_threshold_cs
 
 
-def find_HCs(n, beta, r, m1, m2):
+def find_HCs(n, beta, r, m1, m2, alpha_cs, alpha_hc):
     half = int(m1 / 2)
     critical_hc = np.zeros((m2*half, 2))
     critical_CS = np.zeros((m2*half, 2))
@@ -302,19 +314,19 @@ def find_HCs(n, beta, r, m1, m2):
             #if ((i+1)%(half/8) == 0):
             #    print('+ 25% ')
             x = generate_normal_mixture(n, beta, r, 0)
-            _, hc_1 = hc_plus(x, beta, r)
+            _, hc_1 = hc_plus(x, beta, r, alpha_hc)
             hc_type_1_hc[i] = hc_1
-            _, cs_1 = hc_cscshm_2(x, beta, r)
+            _, cs_1 = hc_cscshm_2(x, beta, r, alpha_cs)
             hc_type_1_CS[i] = cs_1
             # Fill the histos
             critical_hc[j*half + i, 0] = hc_1
             critical_CS[j*half + i, 0] = cs_1
 
             y = generate_normal_mixture(n, beta, r, 1)
-            _, hc_2 = hc_plus(y, beta, r)
+            _, hc_2 = hc_plus(y, beta, r, alpha_hc)
             hc_type_2_hc[i] = hc_2
             # print('HC_plus: ', hc)
-            _, cs_2 = hc_cscshm_2(y, beta, r)
+            _, cs_2 = hc_cscshm_2(y, beta, r, alpha_cs)
             hc_type_2_CS[i] = cs_2
             # print('Ccshm: ', hc)
             critical_hc[j*(half) + i, 1] = hc_2
@@ -332,7 +344,7 @@ def heat_map_save(matrix, n, m, msg):
 # Testing of the functions
 
 n = 10000
-m1 = 500
+m1 = 100
 """
 dense_grid = np.array( [10, 10])
 
@@ -347,7 +359,7 @@ heat_map_alt(dense_cs, n, x_lim, y_lim, 'TRIAL_dense_cs')
 #"""
 
 """
-sparse_grid = np.array( [10, 10])
+sparse_grid = np.array( [20, 20])
 sparse_hc, sparse_cs = sparse_region(n, sparse_grid, m1)
 
 normalize_colors(sparse_hc)
@@ -356,11 +368,11 @@ x_lim = np.array([0.5, 1])
 y_lim = np.array([0, 1])
 
 
-heat_map_save(sparse_hc, n, m1, 'TRIAL_sparse_HC')
-heat_map_save(sparse_cs, n, m1, 'TRIAL_sparse_CsCsHM')
+#heat_map_save(sparse_hc, n, m1, 'TRIAL_sparse_HC')
+#heat_map_save(sparse_cs, n, m1, 'TRIAL_sparse_CsCsHM')
 
-#heat_map_alt(sparse_hc, n, x_lim, y_lim, 'TRIAL_sparse_hc')
-#heat_map_alt(sparse_cs, n, x_lim, y_lim, 'TRIAL_sparse_cs')
+heat_map_alt(sparse_hc, n, x_lim, y_lim, 'TRIAL_sparse_hc')
+heat_map_alt(sparse_cs, n, x_lim, y_lim, 'TRIAL_sparse_cs')
 #"""
 
 n = 10000
@@ -389,7 +401,7 @@ histogram_comparison_save(crit_cs, r'critical values for $CsCsHM$', labels, para
 #"""
 
 # Saving files in this folder as plots
-#"""
+"""
 x_lim = np.array([0.5, 1])
 y_lim = np.array([0, 1])
 
@@ -408,12 +420,14 @@ for fn in os.listdir('.'):
 #"""
 
 
-"""
+#"""
 
-n = 1000
+n = 10000
 m1 = 100
 m2 = 10
 labels = [r'$H_0$ true ', r'$H_1$ true']
+alpha_cs = 0.1
+alpha_hc = 0.1
 
 # Sparse Beta and R:s
 beta_vec = np.array([0.55, 0.75, 0.9])
@@ -424,14 +438,17 @@ beta_vec = np.array([0.1, 0.25, 0.4])
 r_vec = np.array([0.1, 0.25, 0.4])
 
 
-for n in [1000, 10000, 100000]:
+for n in [1000, 10000]:
     for beta in beta_vec:
         for r in r_vec:
             print(beta, r)
             params = [beta, r]
-            crit_hc, crit_cs = find_HCs(n, beta, r, m1, m2)
+            crit_hc, crit_cs = find_HCs(n, beta, r, m1, m2, alpha_cs, alpha_hc)
             # histogram_comparison_save(c_matrix, 'comparison')
             histogram_comparison_save(crit_hc, r'critical values for $HC^+$', labels, params, n, 'EXPLORE_HC')
             histogram_comparison_save(crit_cs, r'critical values for $CsCsHM$', labels, params, n, 'EXPLORE_CS')
 
 #"""
+
+
+
